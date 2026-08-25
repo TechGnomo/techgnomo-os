@@ -17,9 +17,10 @@
 <body>
   <div class="boot-screen" id="bootScreen">
     <div class="boot-terminal">
-      <p>[BOOT] Initialising TechGnomo OS...</p>
+      <p>[BOOT] Initialising TechGnomo OS v2.0...</p>
       <p>[OK] Loading portfolio modules</p>
-      <p>[OK] Mounting projects directory</p>
+      <p>[OK] Mounting /projects directory</p>
+      <p>[OK] Preparing interactive terminal</p>
       <p>[OK] Guest access granted</p>
       <p class="boot-cursor">Starting interface_</p>
     </div>
@@ -31,11 +32,12 @@
         <span class="brand-mark">TG</span>
         <span>
           <strong>TechGnomo OS</strong>
-          <small>v1.0 / guest session</small>
+          <small>v2.0 / guest session</small>
         </span>
       </a>
 
       <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#terminal">terminal</a>
         <a href="#about">whoami</a>
         <a href="#projects">projects</a>
         <a href="#clearmoneypath">current_build</a>
@@ -49,6 +51,7 @@
     </header>
 
     <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
+      <a href="#terminal">terminal</a>
       <a href="#about">whoami</a>
       <a href="#projects">projects</a>
       <a href="#clearmoneypath">current_build</a>
@@ -66,7 +69,7 @@
       </div>
 
       <div class="terminal-content">
-        <p class="command">$ boot techgnomo-os</p>
+        <p class="command">$ boot techgnomo-os --mode portfolio</p>
         <p class="system-line">GUEST_ACCESS_GRANTED</p>
 
         <h1>
@@ -79,7 +82,8 @@
         </p>
 
         <div class="hero-actions">
-          <a href="#projects" class="button primary">open /projects</a>
+          <a href="#terminal" class="button primary">open terminal</a>
+          <a href="#projects" class="button secondary">open /projects</a>
           <a href="#contact" class="button secondary">connect --email</a>
         </div>
 
@@ -104,6 +108,49 @@
             <strong>ClearMoneyPath</strong>
           </article>
         </div>
+      </div>
+    </section>
+
+    <section class="section-grid" id="terminal">
+      <div class="section-label">
+        <p>$ interactive_terminal</p>
+      </div>
+
+      <div class="interactive-terminal">
+        <div class="window-header">
+          <div class="window-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <p>guest@techgnomo-os:~</p>
+        </div>
+
+        <div class="terminal-body" id="terminalOutput">
+          <p><span class="terminal-success">Welcome to TechGnomo OS.</span></p>
+          <p>Type <strong>help</strong> to see available commands.</p>
+        </div>
+
+        
+        <div class="terminal-command-bar" aria-label="Quick terminal commands">
+          <button type="button" data-command="help">help</button>
+          <button type="button" data-command="status">status</button>
+          <button type="button" data-command="projects">projects</button>
+          <button type="button" data-command="clearmoneypath">clearmoneypath</button>
+          <button type="button" data-command="contact">contact</button>
+          <button type="button" data-command="clear">clear</button>
+        </div>
+
+        <form class="terminal-form" id="terminalForm">
+          <label for="terminalInput">guest@techgnomo-os:~$</label>
+          <input
+            id="terminalInput"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="type help and press enter"
+          />
+        </form>
       </div>
     </section>
 
@@ -248,14 +295,15 @@
             <a href="https://techgnomo.com/clearmoneypath.html" target="_blank" rel="noopener" class="button primary">
               view product page
             </a>
-            <a href="#contact" class="button secondary">
-              ask about the build
+            <a href="#terminal" class="button secondary">
+              try command
             </a>
           </div>
         </div>
 
         <div class="phone-preview" aria-label="ClearMoneyPath phone preview">
           <div class="phone-top"></div>
+
           <div class="phone-screen">
             <p class="phone-label">SAFE TO SPEND</p>
             <strong>$186.40</strong>
@@ -311,3 +359,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+

@@ -904,3 +904,53 @@ h2 {
   }
 }
 
+
+/* =========================================================
+   TERMINAL QUICK COMMAND BAR
+   ========================================================= */
+
+.terminal-command-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 24px 20px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.terminal-command-bar button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.045);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.terminal-command-bar button:hover {
+  color: var(--green);
+  border-color: rgba(55, 255, 139, 0.42);
+  background: rgba(55, 255, 139, 0.08);
+  transform: translateY(-2px);
+}
+
+.terminal-command-bar button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 620px) {
+  .terminal-command-bar {
+    padding: 0 18px 18px;
+  }
+
+  .terminal-command-bar button {
+    flex: 1 1 auto;
+  }
+}
+

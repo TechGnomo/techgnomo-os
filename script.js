@@ -4,8 +4,11 @@ const mobileMenu = document.getElementById("mobileMenu");
 const terminalForm = document.getElementById("terminalForm");
 const terminalInput = document.getElementById("terminalInput");
 const terminalOutput = document.getElementById("terminalOutput");
+const commandButtons = document.querySelectorAll("[data-command]");
 
 let terminalBusy = false;
+let commandHistory = [];
+let commandHistoryIndex = -1;
 
 const commands = {
   help: [
@@ -19,7 +22,11 @@ const commands = {
     "stack              Show the technology stack",
     "contact            Show contact links",
     "links              Show external links",
+    "open portfolio     Open the current TechGnomo portfolio",
+    "open app           Open the ClearMoneyPath product page",
     "clear              Clear terminal output",
+    "",
+    "Tip: you can use the quick command buttons under the terminal.",
   ],
 
   about: [
@@ -100,6 +107,30 @@ const commands = {
     "<a class='terminal-link' href='https://github.com/TechGnomo' target='_blank' rel='noopener'>GitHub</a>",
     "<a class='terminal-link' href='https://www.linkedin.com/in/fabio-d-anna-5083b5378/' target='_blank' rel='noopener'>LinkedIn</a>",
   ],
+
+  "open portfolio": [
+    "<span class='terminal-success'>Opening current portfolio...</span>",
+    "<a class='terminal-link' href='https://techgnomo.com' target='_blank' rel='noopener'>https://techgnomo.com</a>",
+  ],
+
+  "open app": [
+    "<span class='terminal-success'>Opening ClearMoneyPath product page...</span>",
+    "<a class='terminal-link' href='https://techgnomo.com/clearmoneypath.html' target='_blank' rel='noopener'>https://techgnomo.com/clearmoneypath.html</a>",
+  ],
+};
+
+const aliases = {
+  h: "help",
+  "?": "help",
+  project: "projects",
+  apps: "projects",
+  app: "clearmoneypath",
+  cmp: "clearmoneypath",
+  build: "clearmoneypath",
+  me: "about",
+  whoami: "about",
+  socials: "contact",
+  email: "contact",
 };
 
 function sleep(ms) {
@@ -112,7 +143,7 @@ function getPlainTextFromHtml(html) {
   return temporaryElement.textContent || temporaryElement.innerText || "";
 }
 
-async function typeTextIntoElement(element, text, speed = 18) {
+async function typeTextIntoElement(element, text, speed = 34) {
   if (!element) {
     return;
   }
@@ -132,7 +163,7 @@ async function typeTextIntoElement(element, text, speed = 18) {
   element.classList.remove("is-typing");
 }
 
-async function typeHtmlLine(element, html, speed = 10) {
+async function typeHtmlLine(element, html, speed = 22) {
   const plainText = getPlainTextFromHtml(html);
 
   element.classList.add("is-typing");
@@ -216,6 +247,7 @@ async function typeInteractiveIntro() {
 
   await printLine("<span class='terminal-success'>Welcome to TechGnomo OS.</span>", "", true);
   await printLine("Type <strong>help</strong> to see available commands.", "", true);
+  await printLine("Use ? and ? to navigate your command history.", "", true);
 }
 
 async function printLine(content, className = "", typed = false) {
@@ -241,8 +273,18 @@ async function printLine(content, className = "", typed = false) {
   terminalOutput.scrollTop = terminalOutput.scrollHeight;
 }
 
+function normalizeCommand(rawCommand) {
+  const command = rawCommand.trim().toLowerCase().replace(/\s+/g, " ");
+
+  if (aliases[command]) {
+    return aliases[command];
+  }
+
+  return command;
+}
+
 async function runCommand(rawCommand) {
-  const command = rawCommand.trim().toLowerCase();
+  const command = normalizeCommand(rawCommand);
 
   if (!command || terminalBusy) {
     return;
@@ -253,6 +295,12 @@ async function runCommand(rawCommand) {
   if (terminalInput) {
     terminalInput.disabled = true;
   }
+
+  if (commandHistory[commandHistory.length - 1] !== command) {
+    commandHistory.push(command);
+  }
+
+  commandHistoryIndex = commandHistory.length;
 
   await printLine(`guest@techgnomo-os:~$ ${command}`, "terminal-line-command", false);
 
@@ -328,10 +376,52 @@ if (terminalForm && terminalInput && terminalOutput) {
   terminalForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    await runCommand(terminalInput.value);
+    const value = terminalInput.value;
     terminalInput.value = "";
+
+    await runCommand(value);
+  });
+
+  terminalInput.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+
+      if (commandHistory.length === 0) {
+        return;
+      }
+
+      commandHistoryIndex = Math.max(0, commandHistoryIndex - 1);
+      terminalInput.value = commandHistory[commandHistoryIndex] || "";
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+
+      if (commandHistory.length === 0) {
+        return;
+      }
+
+      commandHistoryIndex = Math.min(commandHistory.length, commandHistoryIndex + 1);
+      terminalInput.value = commandHistory[commandHistoryIndex] || "";
+    }
+  });
+
+  terminalOutput.addEventListener("click", () => {
+    terminalInput.focus();
   });
 }
+
+commandButtons.forEach((button) => {
+  button.addEventListener("click", async () => {
+    const command = button.dataset.command;
+
+    if (!command || terminalBusy) {
+      return;
+    }
+
+    await runCommand(command);
+  });
+});
 
 const animatedCards = document.querySelectorAll(
   ".terminal-card, .file-card, .current-build, .interactive-terminal, .system-dashboard"
@@ -411,5 +501,3 @@ if ("IntersectionObserver" in window) {
 
   typeInteractiveIntro();
 }
-
-
