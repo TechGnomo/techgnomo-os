@@ -7,10 +7,14 @@ const terminalOutput = document.getElementById("terminalOutput");
 const commandButtons = document.querySelectorAll("[data-command]");
 const focusTerminalButton = document.getElementById("focusTerminalButton");
 const localClock = document.getElementById("localClock");
+const osToast = document.getElementById("osToast");
 
 let terminalBusy = false;
 let commandHistory = [];
 let commandHistoryIndex = -1;
+let toastTimer = null;
+let scrollTicking = false;
+let interfaceStarted = false;
 
 const commands = {
   help: [
@@ -19,21 +23,27 @@ const commands = {
     "experience         Show hospitality + tech background",
     "skills             Show current technical skills",
     "projects           List portfolio projects",
+    "inspect            Jump to Project Inspector",
     "clearmoneypath     Open current build information",
     "status             Show current system status",
     "roadmap            Show next development goals",
     "stack              Show the technology stack",
     "resume             Show resume summary",
     "goals              Show current career goals",
+    "theme              Toggle alternate OS theme",
+    "copy email         Copy contact email",
     "contact            Show contact links",
     "links              Show external links",
-    "open portfolio     Open the current TechGnomo portfolio",
-    "open app           Open the ClearMoneyPath product page",
+    "open portfolio     Show current portfolio link",
+    "open app           Show ClearMoneyPath product page link",
+    "open github        Show GitHub link",
+    "open linkedin      Show LinkedIn link",
     "clear              Clear terminal output",
     "",
     "Shortcuts:",
     "/                  Focus terminal",
     "Ctrl + K           Clear terminal",
+    "Tab                Autocomplete command",
     "? / ?              Navigate command history",
   ],
 
@@ -68,7 +78,13 @@ const commands = {
     "HospitalityRoster.tool    PORTFOLIO_PROJECT",
     "MotorcycleTracker.app     CONCEPT",
     "",
-    "Tip: type clearmoneypath to inspect the current build.",
+    "Tip: type inspect to open the project inspector.",
+  ],
+
+  inspect: [
+    "<span class='terminal-success'>Opening Project Inspector...</span>",
+    "Inspecting /projects directory.",
+    "Scroll target: #project-inspector",
   ],
 
   clearmoneypath: [
@@ -141,13 +157,23 @@ const commands = {
   ],
 
   "open portfolio": [
-    "<span class='terminal-success'>Opening current portfolio...</span>",
+    "<span class='terminal-success'>Current portfolio:</span>",
     "<a class='terminal-link' href='https://techgnomo.com' target='_blank' rel='noopener'>https://techgnomo.com</a>",
   ],
 
   "open app": [
-    "<span class='terminal-success'>Opening ClearMoneyPath product page...</span>",
+    "<span class='terminal-success'>ClearMoneyPath product page:</span>",
     "<a class='terminal-link' href='https://techgnomo.com/clearmoneypath.html' target='_blank' rel='noopener'>https://techgnomo.com/clearmoneypath.html</a>",
+  ],
+
+  "open github": [
+    "<span class='terminal-success'>GitHub profile:</span>",
+    "<a class='terminal-link' href='https://github.com/TechGnomo' target='_blank' rel='noopener'>https://github.com/TechGnomo</a>",
+  ],
+
+  "open linkedin": [
+    "<span class='terminal-success'>LinkedIn profile:</span>",
+    "<a class='terminal-link' href='https://www.linkedin.com/in/fabio-d-anna-5083b5378/' target='_blank' rel='noopener'>LinkedIn profile</a>",
   ],
 };
 
@@ -163,9 +189,55 @@ const aliases = {
   whoami: "about",
   work: "experience",
   cv: "resume",
+  i: "inspect",
+  inspector: "inspect",
+  github: "open github",
+  linkedin: "open linkedin",
   social: "contact",
   socials: "contact",
   email: "contact",
+  copy: "copy email",
+  mail: "copy email",
+};
+
+const allCommandNames = [
+  ...Object.keys(commands),
+  "theme",
+  "copy email",
+  ...Object.keys(aliases),
+];
+
+const sectionConfigs = {
+  terminal: {
+    typingSelector: null,
+    revealSelector: null,
+    focusInput: true,
+  },
+
+  about: {
+    typingSelector: ".terminal-card h2, .terminal-card p",
+    revealSelector: ".tag-list",
+  },
+
+  projects: {
+    typingSelector: ".file-card h2, .file-card p",
+    revealSelector: ".file-meta, .file-actions",
+  },
+
+  "project-inspector": {
+    typingSelector: ".project-inspector summary strong, .inspector-content p, .inspector-grid strong",
+    revealSelector: ".project-inspector summary span, .project-inspector summary em, .inspector-grid article",
+  },
+
+  clearmoneypath: {
+    typingSelector: ".build-copy h2, .build-copy p, .build-copy li",
+    revealSelector: ".eyebrow, .hero-actions, .phone-preview",
+  },
+
+  contact: {
+    typingSelector: ".contact-card h2, .contact-card p",
+    revealSelector: ".contact-links",
+  },
 };
 
 function sleep(ms) {
@@ -176,6 +248,21 @@ function getPlainTextFromHtml(html) {
   const temporaryElement = document.createElement("div");
   temporaryElement.innerHTML = html;
   return temporaryElement.textContent || temporaryElement.innerText || "";
+}
+
+function showToast(message) {
+  if (!osToast) {
+    return;
+  }
+
+  osToast.textContent = message;
+  osToast.classList.add("show");
+
+  window.clearTimeout(toastTimer);
+
+  toastTimer = window.setTimeout(() => {
+    osToast.classList.remove("show");
+  }, 2200);
 }
 
 async function typeTextIntoElement(element, text, speed = 30) {
@@ -211,6 +298,184 @@ async function typeHtmlLine(element, html, speed = 18) {
 
   element.classList.remove("is-typing");
   element.innerHTML = html;
+}
+
+function storeOriginalText(element) {
+  if (!element || element.dataset.originalText) {
+    return;
+  }
+
+  element.dataset.originalText = element.textContent.trim();
+}
+
+function resetTypingTargets(section, selector) {
+  if (!selector) {
+    return [];
+  }
+
+  const targets = Array.from(section.querySelectorAll(selector));
+
+  return targets
+    .map((element) => {
+      storeOriginalText(element);
+
+      return {
+        element,
+        text: element.dataset.originalText || element.textContent.trim(),
+      };
+    })
+    .filter((target) => target.text.length > 0);
+}
+
+function resetRevealTargets(section, selector) {
+  if (!selector) {
+    return [];
+  }
+
+  return Array.from(section.querySelectorAll(selector));
+}
+
+async function typeSectionContent(section, config) {
+  if (!config || !config.typingSelector) {
+    return;
+  }
+
+  const typingTargets = resetTypingTargets(section, config.typingSelector);
+  const revealTargets = resetRevealTargets(section, config.revealSelector);
+
+  typingTargets.forEach((target) => {
+    target.element.textContent = "";
+    target.element.classList.add("typing-target");
+  });
+
+  revealTargets.forEach((target) => {
+    target.classList.remove("typing-reveal-visible");
+    target.classList.add("typing-reveal");
+  });
+
+  await sleep(160);
+
+  for (const target of typingTargets) {
+    const tagName = target.element.tagName.toLowerCase();
+
+    let speed = 18;
+
+    if (tagName === "h2" || tagName === "strong") {
+      speed = 24;
+    }
+
+    if (tagName === "li") {
+      speed = 15;
+    }
+
+    await typeTextIntoElement(target.element, target.text, speed);
+    await sleep(110);
+  }
+
+  revealTargets.forEach((target) => {
+    target.classList.add("typing-reveal-visible");
+  });
+}
+
+function getSectionContent(section) {
+  return Array.from(section.children).find((child) => {
+    return !child.classList.contains("section-label");
+  });
+}
+
+function createButtonFromLabel(section) {
+  const label = section.querySelector(".section-label");
+  const labelText = label?.querySelector("p");
+
+  if (!label || !labelText || label.querySelector(".section-command-button")) {
+    return null;
+  }
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "section-command-button";
+  button.innerHTML = labelText.innerHTML;
+  button.setAttribute("aria-expanded", "false");
+
+  label.replaceChild(button, labelText);
+
+  return button;
+}
+
+function collapseSection(section, button) {
+  section.classList.remove("section-command-open");
+  section.classList.add("section-command-collapsed");
+
+  if (button) {
+    button.setAttribute("aria-expanded", "false");
+    button.classList.remove("section-command-button-active");
+  }
+}
+
+async function openSection(section, button, config) {
+  section.classList.remove("section-command-collapsed");
+  section.classList.add("section-command-open");
+
+  if (button) {
+    button.setAttribute("aria-expanded", "true");
+    button.classList.add("section-command-button-active");
+  }
+
+  section.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+
+  await sleep(430);
+
+  if (section.id === "terminal") {
+    await typeInteractiveIntro(true);
+
+    if (terminalInput) {
+      terminalInput.focus();
+    }
+
+    return;
+  }
+
+  await typeSectionContent(section, config);
+}
+
+function initialiseClickableSections() {
+  Object.keys(sectionConfigs).forEach((sectionId) => {
+    const section = document.getElementById(sectionId);
+
+    if (!section) {
+      return;
+    }
+
+    const button = createButtonFromLabel(section) || section.querySelector(".section-command-button");
+
+    if (!button) {
+      return;
+    }
+
+    collapseSection(section, button);
+
+    if (button.dataset.sectionHandlerAttached === "true") {
+      return;
+    }
+
+    button.dataset.sectionHandlerAttached = "true";
+
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const isOpen = section.classList.contains("section-command-open");
+
+      if (isOpen) {
+        collapseSection(section, button);
+        return;
+      }
+
+      await openSection(section, button, sectionConfigs[sectionId]);
+    });
+  });
 }
 
 async function typeTerminalWindow(terminalWindow) {
@@ -272,8 +537,12 @@ async function typeTerminalWindow(terminalWindow) {
   });
 }
 
-async function typeInteractiveIntro() {
-  if (!terminalOutput || terminalOutput.dataset.typed === "true") {
+async function typeInteractiveIntro(forceRestart = false) {
+  if (!terminalOutput) {
+    return;
+  }
+
+  if (terminalOutput.dataset.typed === "true" && !forceRestart) {
     return;
   }
 
@@ -283,6 +552,7 @@ async function typeInteractiveIntro() {
   await printLine("<span class='terminal-success'>Welcome to TechGnomo OS.</span>", "", true);
   await printLine("Type <strong>help</strong> to see available commands.", "", true);
   await printLine("Use ? and ? to navigate your command history.", "", true);
+  await printLine("Use Tab to autocomplete commands.", "", true);
 }
 
 async function printLine(content, className = "", typed = false) {
@@ -321,6 +591,11 @@ function normalizeCommand(rawCommand) {
 function focusTerminal() {
   const terminalSection = document.getElementById("terminal");
 
+  if (terminalSection && terminalSection.classList.contains("section-command-collapsed")) {
+    const terminalButton = terminalSection.querySelector(".section-command-button");
+    openSection(terminalSection, terminalButton, sectionConfigs.terminal);
+  }
+
   if (terminalSection) {
     terminalSection.scrollIntoView({
       behavior: "smooth",
@@ -333,6 +608,30 @@ function focusTerminal() {
       terminalInput.focus();
     }
   }, 450);
+
+  showToast("Terminal focused");
+}
+
+function scrollToSection(id) {
+  const target = document.getElementById(id);
+
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+async function copyText(value) {
+  try {
+    await navigator.clipboard.writeText(value);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 async function runCommand(rawCommand) {
@@ -367,6 +666,49 @@ async function runCommand(rawCommand) {
       terminalInput.focus();
     }
 
+    showToast("Terminal cleared");
+    return;
+  }
+
+  if (command === "theme") {
+    document.body.classList.toggle("alt-theme");
+
+    const themeName = document.body.classList.contains("alt-theme")
+      ? "ALT_THEME"
+      : "DEFAULT_THEME";
+
+    await printLine(`<span class='terminal-success'>Theme switched:</span> ${themeName}`, "", true);
+
+    terminalBusy = false;
+
+    if (terminalInput) {
+      terminalInput.disabled = false;
+      terminalInput.focus();
+    }
+
+    showToast(`Theme: ${themeName}`);
+    return;
+  }
+
+  if (command === "copy email") {
+    const email = "gnomocode@gmail.com";
+    const copied = await copyText(email);
+
+    if (copied) {
+      await printLine(`<span class='terminal-success'>Copied email:</span> ${email}`, "", true);
+      showToast("Email copied");
+    } else {
+      await printLine(`<span class='terminal-warning'>Copy unavailable.</span> Email: ${email}`, "", true);
+      showToast("Copy unavailable");
+    }
+
+    terminalBusy = false;
+
+    if (terminalInput) {
+      terminalInput.disabled = false;
+      terminalInput.focus();
+    }
+
     return;
   }
 
@@ -381,11 +723,40 @@ async function runCommand(rawCommand) {
       terminalInput.focus();
     }
 
+    showToast("Unknown command");
     return;
   }
 
   for (const line of commands[command]) {
     await printLine(line, "", true);
+  }
+
+  if (command === "inspect") {
+    const inspectorSection = document.getElementById("project-inspector");
+    const inspectorButton = inspectorSection?.querySelector(".section-command-button");
+
+    if (inspectorSection && inspectorSection.classList.contains("section-command-collapsed")) {
+      window.setTimeout(() => {
+        openSection(inspectorSection, inspectorButton, sectionConfigs["project-inspector"]);
+      }, 300);
+    } else {
+      window.setTimeout(() => scrollToSection("project-inspector"), 300);
+    }
+
+    showToast("Opening Project Inspector");
+  }
+
+  if (command === "clearmoneypath") {
+    const appSection = document.getElementById("clearmoneypath");
+    const appButton = appSection?.querySelector(".section-command-button");
+
+    if (appSection && appSection.classList.contains("section-command-collapsed")) {
+      window.setTimeout(() => {
+        openSection(appSection, appButton, sectionConfigs.clearmoneypath);
+      }, 300);
+    } else {
+      window.setTimeout(() => scrollToSection("clearmoneypath"), 300);
+    }
   }
 
   terminalBusy = false;
@@ -410,24 +781,150 @@ function updateClock() {
   });
 }
 
-window.addEventListener("load", async () => {
-  updateClock();
-  window.setInterval(updateClock, 1000);
+function updateActiveDockLink() {
+  const dockLinks = document.querySelectorAll(".os-dock a[href^='#']");
+  const sections = Array.from(document.querySelectorAll("main[id], section[id]"));
 
-  await sleep(1200);
+  let currentId = "home";
+
+  sections.forEach((section) => {
+    const sectionTop = section.getBoundingClientRect().top;
+
+    if (sectionTop <= 180) {
+      currentId = section.id;
+    }
+  });
+
+  dockLinks.forEach((link) => {
+    const href = link.getAttribute("href");
+
+    if (href === `#${currentId}`) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+}
+
+function requestActiveDockUpdate() {
+  if (scrollTicking) {
+    return;
+  }
+
+  scrollTicking = true;
+
+  window.requestAnimationFrame(() => {
+    updateActiveDockLink();
+    scrollTicking = false;
+  });
+}
+
+function autocompleteCommand() {
+  if (!terminalInput) {
+    return;
+  }
+
+  const value = terminalInput.value.trim().toLowerCase();
+
+  if (!value) {
+    terminalInput.value = "help";
+    return;
+  }
+
+  const match = allCommandNames
+    .filter((commandName) => commandName.startsWith(value))
+    .sort((a, b) => a.length - b.length)[0];
+
+  if (match) {
+    terminalInput.value = match;
+    showToast(`Autocomplete: ${match}`);
+  }
+}
+
+function createBootInputPrompt() {
+  if (!bootScreen) {
+    return;
+  }
+
+  if (bootScreen.querySelector(".boot-input-prompt")) {
+    return;
+  }
+
+  const bootTerminal = bootScreen.querySelector(".boot-terminal");
+
+  if (!bootTerminal) {
+    return;
+  }
+
+  const prompt = document.createElement("p");
+  prompt.className = "boot-input-prompt";
+  prompt.textContent = "Press any key / click / tap / scroll to enter interface";
+
+  bootTerminal.appendChild(prompt);
+}
+
+async function startInterface() {
+  if (interfaceStarted) {
+    return;
+  }
+
+  interfaceStarted = true;
 
   if (bootScreen) {
     bootScreen.classList.add("hidden");
   }
 
-  await sleep(300);
+  await sleep(320);
 
   const firstTerminalWindow = document.querySelector(".terminal-window");
 
   if (firstTerminalWindow) {
     typeTerminalWindow(firstTerminalWindow);
   }
+}
+
+function waitForUserInputToStart() {
+  if (!bootScreen) {
+    startInterface();
+    return;
+  }
+
+  createBootInputPrompt();
+
+  window.setTimeout(() => {
+    bootScreen.classList.add("boot-ready");
+  }, 900);
+
+  const startEvents = ["pointerdown", "keydown", "touchstart", "wheel"];
+
+  const handleStart = () => {
+    startEvents.forEach((eventName) => {
+      window.removeEventListener(eventName, handleStart);
+    });
+
+    startInterface();
+  };
+
+  startEvents.forEach((eventName) => {
+    window.addEventListener(eventName, handleStart, {
+      once: true,
+      passive: true,
+    });
+  });
+}
+
+window.addEventListener("load", () => {
+  updateClock();
+  updateActiveDockLink();
+  initialiseClickableSections();
+
+  window.setInterval(updateClock, 1000);
+
+  waitForUserInputToStart();
 });
+
+window.addEventListener("scroll", requestActiveDockUpdate, { passive: true });
+window.addEventListener("resize", requestActiveDockUpdate);
 
 if (menuButton && mobileMenu) {
   menuButton.addEventListener("click", () => {
@@ -472,6 +969,11 @@ if (terminalForm && terminalInput && terminalOutput) {
 
       commandHistoryIndex = Math.min(commandHistory.length, commandHistoryIndex + 1);
       terminalInput.value = commandHistory[commandHistoryIndex] || "";
+    }
+
+    if (event.key === "Tab") {
+      event.preventDefault();
+      autocompleteCommand();
     }
   });
 
@@ -547,48 +1049,4 @@ if ("IntersectionObserver" in window) {
   animatedCards.forEach((card) => {
     cardObserver.observe(card);
   });
-
-  const terminalWindowObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          typeTerminalWindow(entry.target);
-          terminalWindowObserver.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.25,
-    }
-  );
-
-  document.querySelectorAll(".terminal-window").forEach((terminalWindow) => {
-    terminalWindowObserver.observe(terminalWindow);
-  });
-
-  const interactiveTerminalObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          typeInteractiveIntro();
-          interactiveTerminalObserver.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.25,
-    }
-  );
-
-  const interactiveTerminal = document.querySelector(".interactive-terminal");
-
-  if (interactiveTerminal) {
-    interactiveTerminalObserver.observe(interactiveTerminal);
-  }
-} else {
-  document.querySelectorAll(".terminal-window").forEach((terminalWindow) => {
-    typeTerminalWindow(terminalWindow);
-  });
-
-  typeInteractiveIntro();
 }

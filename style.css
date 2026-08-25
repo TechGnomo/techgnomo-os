@@ -1209,3 +1209,272 @@ h2 {
   }
 }
 
+
+/* =========================================================
+   OS INTERACTION UPGRADE
+   ========================================================= */
+
+.os-dock a.active {
+  color: #03100a;
+  border-color: rgba(55, 255, 139, 0.65);
+  background: var(--green);
+}
+
+.os-toast {
+  position: fixed;
+  right: 22px;
+  bottom: 96px;
+  z-index: 120;
+  max-width: min(320px, calc(100% - 44px));
+  padding: 14px 16px;
+  border: 1px solid rgba(55, 255, 139, 0.34);
+  border-radius: 18px;
+  color: var(--green);
+  background: rgba(8, 13, 11, 0.92);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.36);
+  font-family: var(--mono);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    opacity 0.24s ease,
+    transform 0.24s ease;
+}
+
+.os-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body.alt-theme {
+  --green: #b7ff5c;
+  --green-soft: rgba(183, 255, 92, 0.14);
+  --cyan: #ff7ad9;
+  --orange: #7dd3fc;
+}
+
+body.alt-theme .brand-mark {
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+}
+
+body.alt-theme .file-type,
+body.alt-theme .os-dock a.active,
+body.alt-theme .project-inspector summary span {
+  color: #081006;
+}
+
+.terminal-form input:focus {
+  color: var(--green);
+}
+
+.terminal-command-bar button:focus-visible,
+.os-dock a:focus-visible,
+.os-dock button:focus-visible,
+.contact-links a:focus-visible,
+.file-actions a:focus-visible,
+.button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.project-inspector details[open] {
+  border-color: rgba(55, 255, 139, 0.32);
+}
+
+.project-inspector details[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+@media (max-width: 620px) {
+  .os-toast {
+    right: 14px;
+    bottom: 92px;
+  }
+}
+
+
+/* =========================================================
+   ABOUT TYPING ANIMATION
+   ========================================================= */
+
+#about .terminal-card h2.typing-target {
+  min-height: 1.05em;
+}
+
+#about .terminal-card p.typing-target {
+  min-height: 3.7em;
+}
+
+#about .tag-list.about-tags-hidden {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+#about .tag-list.about-tags-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+@media (max-width: 620px) {
+  #about .terminal-card p.typing-target {
+    min-height: 5.2em;
+  }
+}
+
+
+/* =========================================================
+   CLICKABLE SECTION COMMAND BUTTONS
+   ========================================================= */
+
+.section-command-button {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid rgba(55, 255, 139, 0.18);
+  border-radius: 0;
+  padding: 8px 10px;
+  color: var(--green);
+  background: rgba(55, 255, 139, 0.08);
+  font-family: var(--mono);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    transform 0.22s ease;
+}
+
+.section-command-button::before {
+  content: ">";
+  margin-right: 8px;
+  color: var(--cyan);
+}
+
+.section-command-button:hover,
+.section-command-button-active {
+  color: #03100a;
+  border-color: rgba(55, 255, 139, 0.65);
+  background: var(--green);
+  transform: translateX(6px);
+}
+
+.section-command-button:hover::before,
+.section-command-button-active::before {
+  color: #03100a;
+}
+
+.section-command-collapsed > :not(.section-label) {
+  display: none;
+}
+
+.section-command-open > :not(.section-label) {
+  display: block;
+  animation: sectionCommandReveal 0.45s ease both;
+}
+
+.section-command-open > .file-list,
+.section-command-open > .system-dashboard,
+.section-command-open > .project-inspector {
+  display: grid;
+}
+
+.section-command-open > .current-build {
+  display: grid;
+}
+
+.section-command-open > .interactive-terminal {
+  display: block;
+}
+
+@keyframes sectionCommandReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-command-open .typing-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.section-command-open .typing-reveal.typing-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+@media (max-width: 620px) {
+  .section-command-button {
+    width: 100%;
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   RESTORE SECTION COMMAND AESTHETIC
+   ========================================================= */
+
+.section-command-button {
+  width: fit-content !important;
+  max-width: 100% !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  color: var(--green) !important;
+  background: transparent !important;
+  font-family: var(--mono) !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transform: none !important;
+}
+
+.section-command-button::before {
+  content: ">" !important;
+  margin-right: 8px !important;
+  color: var(--cyan) !important;
+}
+
+.section-command-button:hover,
+.section-command-button-active {
+  color: var(--green) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  transform: translateX(4px) !important;
+  text-shadow: 0 0 18px rgba(55, 255, 139, 0.32) !important;
+}
+
+.section-command-button:hover::before,
+.section-command-button-active::before {
+  color: var(--cyan) !important;
+}
+
+.section-command-button-active::after {
+  content: "  [open]";
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 620px) {
+  .section-command-button {
+    width: fit-content !important;
+    font-size: 13px !important;
+  }
+}
+
