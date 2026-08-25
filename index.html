@@ -8,7 +8,7 @@
 
   <meta
     name="description"
-    content="TechGnomo OS is a terminal-style portfolio interface for Fabio D'Anna / TechGnomo."
+    content="TechGnomo OS is a terminal-style portfolio for Fabio D'Anna / TechGnomo."
   />
 
   <link rel="stylesheet" href="style.css" />
@@ -16,63 +16,205 @@
 
 <body>
   <div class="boot-screen" id="bootScreen">
-    <div class="boot-terminal">
+    <div class="boot-box">
       <p>[BOOT] Initialising TechGnomo OS...</p>
-      <p>[OK] Loading kernel modules</p>
       <p>[OK] Mounting /home/guest/techgnomoOS</p>
-      <p>[OK] Checking portfolio filesystem</p>
-      <p>[OK] Preparing command interface</p>
+      <p>[OK] Loading portfolio filesystem</p>
+      <p>[OK] Checking project directory</p>
       <p>[OK] Guest access granted</p>
-      <p class="boot-cursor">Waiting for user input_</p>
-      <p class="boot-input-prompt">Press any key / click / tap / scroll to enter interface</p>
+      <p class="boot-ready">press any key / click / tap to continue_</p>
     </div>
   </div>
 
-  <main class="cmd-desktop" id="cmdDesktop" aria-label="TechGnomo OS desktop">
-    <section class="cmd-window" aria-label="TechGnomo OS terminal">
-      <div class="cmd-titlebar">
-        <div class="window-dots" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
+  <main class="terminal-page" id="page">
+    <section class="terminal-shell" aria-label="TechGnomo OS terminal portfolio">
+      <header class="sys-header" id="home">
+        <div class="sys-grid">
+          <p><span>SYS.NAME</span> TechGnomo_OS v3.0</p>
+          <p><span>SYS.AUTH</span> GUEST_ACCESS_GRANTED</p>
+          <p><span>SYS.NODE</span> techgnomo.com</p>
+          <p><span>UPTIME</span> <strong id="uptime">calculating...</strong></p>
+          <p><span>TERMINAL</span> TTY0</p>
+          <p><span>STATUS</span> 200</p>
         </div>
 
-        <p>/home/guest/techgnomoOS</p>
+        <pre class="ascii-logo" aria-label="TechGnomo OS ASCII logo">
+ _______          _      _____
+|__   __|        | |    / ____|
+   | | ___   ___ | |__ | |  __ _ __   ___  _ __ ___   ___
+   | |/ _ \ / _ \| '_ \| | |_ | '_ \ / _ \| '_ ` _ \ / _ \
+   | |  __/| (_) | | | | |__| | | | | (_) | | | | | | (_) |
+   |_|\___| \___/|_| |_|\_____|_| |_|\___/|_| |_| |_|\___/
 
-        <div class="cmd-status">
-          <span id="localClock">--:--:--</span>
-          <span>GUEST</span>
+        </pre>
+      </header>
+
+      <section class="terminal-block">
+        <p class="prompt">$ whoami</p>
+        <p>Fabio D'Anna / TechGnomo.</p>
+        <p>Hospitality manager transitioning into junior web development, mobile apps and IT support.</p>
+        <p>I build practical digital tools for real-world problems: budgeting, productivity, hospitality operations and simple software that actually helps people.</p>
+      </section>
+
+      <section class="terminal-block">
+        <p class="prompt">$ cat status.txt</p>
+
+        <div class="status-list">
+          <p><span>LOCATION</span> Queensland, Australia</p>
+          <p><span>FOCUS</span> Web development -- Mobile apps -- IT support</p>
+          <p><span>BUILDING</span> ClearMoneyPath.app</p>
+          <p><span>LEARNING</span> JavaScript -- React Native -- Firebase -- GitHub</p>
+          <p><span>CONTACT</span> <a href="mailto:gnomocode@gmail.com">gnomocode@gmail.com</a></p>
         </div>
-      </div>
+      </section>
 
-      <div class="cmd-output" id="terminalOutput" aria-live="polite"></div>
+      <section class="terminal-block">
+        <p class="prompt">$ ls -la /projects/</p>
+        <p class="hint">4 entries -- click filename to expand -- click again to close</p>
 
-      <form class="cmd-input-row" id="terminalForm">
-        <label for="terminalInput">guest@techgnomoOS:~$</label>
-        <input
-          id="terminalInput"
-          type="text"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="type help and press enter"
-        />
-      </form>
+        <div class="project-table" id="projects">
+          <div class="project-head">
+            <span>NAME</span>
+            <span>SIZE</span>
+            <span>MODIFIED</span>
+            <span>DESCRIPTION</span>
+          </div>
+
+          <article class="project-row">
+            <button class="project-file" type="button" aria-expanded="false">
+              ClearMoneyPath.app
+            </button>
+            <span>18.7kb</span>
+            <span>2026</span>
+            <span>Mobile-first pay cycle planner</span>
+
+            <div class="project-detail">
+              <p class="prompt">$ cat ClearMoneyPath.app</p>
+
+              <div class="case-grid">
+                <p><span>ROLE</span> Solo developer</p>
+                <p><span>STACK</span> React Native -- Expo -- Firebase</p>
+                <p><span>STATUS</span> MVP in development</p>
+                <p><span>CORE</span> Safe to Spend</p>
+              </div>
+
+              <p class="comment">// the problem</p>
+              <p>People get paid, pay bills, save what they can, and then struggle to know what is actually safe to spend until the next payday.</p>
+
+              <p class="comment">// the solution</p>
+              <p>ClearMoneyPath turns every pay cycle into a simple plan: what to pay, what to save, what is safe to spend and how long until the user is debt-free.</p>
+
+              <p class="project-links">
+                <a href="https://techgnomo.com/clearmoneypath.html" target="_blank" rel="noopener">[OPEN PRODUCT PAGE]</a>
+              </p>
+            </div>
+          </article>
+
+          <article class="project-row">
+            <button class="project-file" type="button" aria-expanded="false">
+              BudgetPlanner.web
+            </button>
+            <span>9.4kb</span>
+            <span>2026</span>
+            <span>Budget overview demo</span>
+
+            <div class="project-detail">
+              <p class="prompt">$ cat BudgetPlanner.web</p>
+
+              <div class="case-grid">
+                <p><span>ROLE</span> Designer + developer</p>
+                <p><span>STACK</span> HTML -- CSS -- JavaScript</p>
+                <p><span>STATUS</span> Portfolio demo</p>
+                <p><span>FOCUS</span> Simple money visibility</p>
+              </div>
+
+              <p class="comment">// notes</p>
+              <p>A first budgeting demo that helped shape the bigger ClearMoneyPath mobile app idea.</p>
+            </div>
+          </article>
+
+          <article class="project-row">
+            <button class="project-file" type="button" aria-expanded="false">
+              HospitalityRoster.tool
+            </button>
+            <span>12.1kb</span>
+            <span>2026</span>
+            <span>Staff roster planning concept</span>
+
+            <div class="project-detail">
+              <p class="prompt">$ cat HospitalityRoster.tool</p>
+
+              <div class="case-grid">
+                <p><span>ROLE</span> Concept + product direction</p>
+                <p><span>STACK</span> Web app concept</p>
+                <p><span>STATUS</span> Portfolio project</p>
+                <p><span>FOCUS</span> Hospitality operations</p>
+              </div>
+
+              <p class="comment">// why it matters</p>
+              <p>Built from real hospitality experience: staff availability, pressure, shift planning and daily operational chaos.</p>
+            </div>
+          </article>
+
+          <article class="project-row">
+            <button class="project-file" type="button" aria-expanded="false">
+              MotorcycleTracker.app
+            </button>
+            <span>7.8kb</span>
+            <span>2026</span>
+            <span>Maintenance tracking concept</span>
+
+            <div class="project-detail">
+              <p class="prompt">$ cat MotorcycleTracker.app</p>
+
+              <div class="case-grid">
+                <p><span>ROLE</span> Concept + prototype planning</p>
+                <p><span>STACK</span> Mobile app concept</p>
+                <p><span>STATUS</span> Early idea</p>
+                <p><span>FOCUS</span> Service reminders</p>
+              </div>
+
+              <p class="comment">// idea</p>
+              <p>A simple place to track tyres, oil, chain, rego, service history and upcoming maintenance for riders.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="terminal-block">
+        <p class="prompt">$ cat roadmap.txt</p>
+
+        <p>01. Polish TechGnomo OS visual identity</p>
+        <p>02. Add real screenshots and mockups for ClearMoneyPath</p>
+        <p>03. Create stronger case studies for each project</p>
+        <p>04. Add downloadable resume</p>
+        <p>05. Connect this version to the main TechGnomo portfolio</p>
+      </section>
+
+      <section class="terminal-block">
+        <p class="prompt">$ connect --profile</p>
+
+        <p><a href="mailto:gnomocode@gmail.com">gnomocode@gmail.com</a></p>
+        <p><a href="https://github.com/TechGnomo" target="_blank" rel="noopener">github.com/TechGnomo</a></p>
+        <p><a href="https://www.linkedin.com/in/fabio-d-anna-5083b5378/" target="_blank" rel="noopener">LinkedIn profile</a></p>
+      </section>
+
+      <section class="terminal-input-block">
+        <form id="terminalForm" class="mini-terminal">
+          <label for="terminalInput">guest@techgnomoOS:~$</label>
+          <input
+            id="terminalInput"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="type help"
+          />
+        </form>
+
+        <div id="terminalOutput" class="mini-output" aria-live="polite"></div>
+      </section>
     </section>
-
-    <nav class="os-dock" aria-label="TechGnomo OS quick commands">
-      <button type="button" data-command="home">home</button>
-      <button type="button" data-command="help">help</button>
-      <button type="button" data-command="about">about</button>
-      <button type="button" data-command="projects">projects</button>
-      <button type="button" data-command="inspect">inspect</button>
-      <button type="button" data-command="clearmoneypath">app</button>
-      <button type="button" data-command="contact">contact</button>
-      <button type="button" data-command="theme">theme</button>
-      <button type="button" data-command="clear">clear</button>
-    </nav>
   </main>
-
-  <div class="os-toast" id="osToast" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>
