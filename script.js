@@ -1,31 +1,42 @@
 const bootScreen = document.getElementById("bootScreen");
-const menuButton = document.getElementById("menuButton");
-const mobileMenu = document.getElementById("mobileMenu");
 const terminalForm = document.getElementById("terminalForm");
 const terminalInput = document.getElementById("terminalInput");
 const terminalOutput = document.getElementById("terminalOutput");
 const commandButtons = document.querySelectorAll("[data-command]");
-const focusTerminalButton = document.getElementById("focusTerminalButton");
 const localClock = document.getElementById("localClock");
 const osToast = document.getElementById("osToast");
 
+let interfaceStarted = false;
 let terminalBusy = false;
 let commandHistory = [];
 let commandHistoryIndex = -1;
 let toastTimer = null;
-let scrollTicking = false;
-let interfaceStarted = false;
 
 const commands = {
+  home: [
+    "<span class='terminal-success'>TechGnomo OS session loaded.</span>",
+    "$ init user_session --guest",
+    "> session.user: Fabio D&apos;Anna / TechGnomo",
+    "> location: Queensland, Australia",
+    "> current_path: hospitality_manager -> junior_developer",
+    "> focus: web_development | mobile_apps | IT_support",
+    "> current_build: ClearMoneyPath.app",
+    "> mission: build practical software for real-world problems",
+    "> status: online",
+    "",
+    "Type <strong>help</strong> to view available commands.",
+  ],
+
   help: [
     "<span class='terminal-success'>Available commands:</span>",
+    "home               Show startup output",
     "about              Show who Fabio / TechGnomo is",
     "experience         Show hospitality + tech background",
-    "skills             Show current technical skills",
+    "skills             Show technical skills",
     "projects           List portfolio projects",
-    "inspect            Jump to Project Inspector",
+    "inspect            Inspect project files",
     "clearmoneypath     Open current build information",
-    "status             Show current system status",
+    "status             Show OS status",
     "roadmap            Show next development goals",
     "stack              Show the technology stack",
     "resume             Show resume summary",
@@ -48,93 +59,116 @@ const commands = {
   ],
 
   about: [
-    "<span class='terminal-success'>Fabio D&apos;Anna / TechGnomo</span>",
-    "Hospitality manager moving into junior web development, software development and IT support.",
-    "Current focus: practical tools, mobile apps, web projects and simple systems that solve real problems.",
-    "Location: Queensland, Australia.",
+    "<span class='terminal-success'>whoami</span>",
+    "Name: Fabio D&apos;Anna",
+    "Alias: TechGnomo",
+    "Location: Queensland, Australia",
+    "Current transition: hospitality management -> junior developer / IT support",
+    "Main advantage: real operational experience + practical software problem solving.",
   ],
 
   experience: [
-    "<span class='terminal-success'>Experience profile:</span>",
+    "<span class='terminal-success'>experience.log</span>",
     "Hospitality management background with real-world business operations experience.",
-    "Strong understanding of customer pressure, staff coordination, budgets, time limits and operational problems.",
-    "Currently translating that practical experience into web apps, mobile apps and IT support skills.",
+    "Strong understanding of customers, staff coordination, budgets, time pressure and operational problems.",
+    "Current goal: translate that experience into useful web apps, mobile apps and IT support solutions.",
   ],
 
   skills: [
-    "<span class='terminal-success'>Skills loaded:</span>",
+    "<span class='terminal-success'>skills --list</span>",
     "HTML / CSS / JavaScript",
     "React Native / Expo",
     "Firebase Authentication / Firestore",
     "Git / GitHub / GitHub Pages",
-    "Practical business operations from hospitality management",
-    "IT support foundations and troubleshooting mindset",
+    "Troubleshooting / IT support mindset",
+    "Business operations from hospitality management",
   ],
 
   projects: [
     "<span class='terminal-success'>/projects directory:</span>",
-    "ClearMoneyPath.app        MVP_IN_DEVELOPMENT",
-    "BudgetPlanner.web         LIVE_DEMO",
-    "HospitalityRoster.tool    PORTFOLIO_PROJECT",
-    "MotorcycleTracker.app     CONCEPT",
+    "01  ClearMoneyPath.app        MVP_IN_DEVELOPMENT",
+    "02  BudgetPlanner.web         LIVE_DEMO",
+    "03  HospitalityRoster.tool    PORTFOLIO_PROJECT",
+    "04  MotorcycleTracker.app     CONCEPT",
     "",
-    "Tip: type inspect to open the project inspector.",
+    "Use: inspect",
+    "Use: clearmoneypath",
   ],
 
   inspect: [
-    "<span class='terminal-success'>Opening Project Inspector...</span>",
-    "Inspecting /projects directory.",
-    "Scroll target: #project-inspector",
+    "<span class='terminal-success'>inspect /projects</span>",
+    "",
+    "[01] ClearMoneyPath.app",
+    "     Stack: React Native / Expo / Firebase",
+    "     Core: Safe to Spend",
+    "     Problem: payday clarity and debt control",
+    "     Next: prepare store-ready version",
+    "",
+    "[02] BudgetPlanner.web",
+    "     Stack: HTML / CSS / JavaScript",
+    "     Core: budget overview",
+    "     Problem: knowing where money goes",
+    "",
+    "[03] HospitalityRoster.tool",
+    "     Stack: web app concept",
+    "     Core: shift planning",
+    "     Problem: managing staff availability",
+    "",
+    "[04] MotorcycleTracker.app",
+    "     Stack: mobile app concept",
+    "     Core: maintenance reminders",
+    "     Problem: tracking service history",
   ],
 
   clearmoneypath: [
-    "<span class='terminal-success'>Opening /projects/ClearMoneyPath.app...</span>",
+    "<span class='terminal-success'>open /projects/ClearMoneyPath.app</span>",
     "ClearMoneyPath is a mobile-first pay cycle planner.",
     "Goal: help users know what to pay, what to save, what is safe to spend and how long until they are debt-free.",
-    "Stack: React Native, Expo, Firebase.",
+    "Core feature: Safe to Spend",
+    "Pay cycles: weekly / fortnightly / monthly",
+    "Stack: React Native, Expo, Firebase",
     "<a class='terminal-link' href='https://techgnomo.com/clearmoneypath.html' target='_blank' rel='noopener'>Open ClearMoneyPath landing page</a>",
   ],
 
   status: [
-    "<span class='terminal-success'>System status:</span>",
-    "PORTFOLIO_MODE       ACTIVE",
+    "<span class='terminal-success'>system --status</span>",
+    "PORTFOLIO_MODE       CMD_INTERFACE",
     "CURRENT_BUILD        ClearMoneyPath",
     "LEARNING_PATH        Web / Mobile / IT Support",
     "DEPLOYMENT           GitHub Pages",
-    "PUBLIC_VERSION       TechGnomo OS v2",
-    "NEXT_OBJECTIVE       Make the interface more interactive and memorable",
+    "PUBLIC_VERSION       TechGnomo OS CMD",
+    "STATUS               ONLINE",
   ],
 
   roadmap: [
-    "<span class='terminal-success'>Development roadmap:</span>",
-    "01. Improve terminal UI and command responses",
-    "02. Add project detail panels",
-    "03. Add real app screenshots / mockups",
-    "04. Add downloadable resume",
-    "05. Connect TechGnomo OS to the main portfolio",
-    "06. Use TechGnomo OS as the future homepage style",
+    "<span class='terminal-success'>roadmap.txt</span>",
+    "01. Polish TechGnomo OS CMD interface",
+    "02. Add real ClearMoneyPath screenshots/mockups",
+    "03. Add downloadable resume",
+    "04. Connect this OS style to the main portfolio",
+    "05. Use TechGnomo OS as future homepage style",
   ],
 
   stack: [
-    "<span class='terminal-success'>Tech stack:</span>",
+    "<span class='terminal-success'>stack --current</span>",
     "Frontend: HTML, CSS, JavaScript",
     "Hosting: GitHub Pages",
     "Version control: Git + GitHub",
     "App build: React Native, Expo, Firebase",
-    "Design style: terminal UI, OS dashboard, hacker portfolio",
+    "Design style: command interface / OS dashboard / hacker portfolio",
   ],
 
   resume: [
-    "<span class='terminal-success'>Resume summary:</span>",
+    "<span class='terminal-success'>resume --summary</span>",
     "Name: Fabio D&apos;Anna",
     "Focus: Junior Web Developer / Junior Software Developer / IT Support",
     "Current build: ClearMoneyPath",
-    "Strength: combining hospitality management experience with practical software problem solving.",
+    "Strength: hospitality management experience + practical software problem solving",
     "Portfolio: https://techgnomo.com",
   ],
 
   goals: [
-    "<span class='terminal-success'>Current goals:</span>",
+    "<span class='terminal-success'>goals --active</span>",
     "01. Complete and polish ClearMoneyPath",
     "02. Build a stronger developer portfolio",
     "03. Prepare for junior developer / IT support opportunities",
@@ -142,14 +176,14 @@ const commands = {
   ],
 
   contact: [
-    "<span class='terminal-success'>Connection options:</span>",
+    "<span class='terminal-success'>connect --profile</span>",
     "<a class='terminal-link' href='mailto:gnomocode@gmail.com'>gnomocode@gmail.com</a>",
     "<a class='terminal-link' href='https://github.com/TechGnomo' target='_blank' rel='noopener'>GitHub: TechGnomo</a>",
     "<a class='terminal-link' href='https://www.linkedin.com/in/fabio-d-anna-5083b5378/' target='_blank' rel='noopener'>LinkedIn profile</a>",
   ],
 
   links: [
-    "<span class='terminal-success'>External links:</span>",
+    "<span class='terminal-success'>links --external</span>",
     "<a class='terminal-link' href='https://techgnomo.com' target='_blank' rel='noopener'>Current portfolio</a>",
     "<a class='terminal-link' href='https://techgnomo.com/clearmoneypath.html' target='_blank' rel='noopener'>ClearMoneyPath product page</a>",
     "<a class='terminal-link' href='https://github.com/TechGnomo' target='_blank' rel='noopener'>GitHub</a>",
@@ -180,17 +214,17 @@ const commands = {
 const aliases = {
   h: "help",
   "?": "help",
-  project: "projects",
-  apps: "projects",
-  app: "clearmoneypath",
-  cmp: "clearmoneypath",
-  build: "clearmoneypath",
   me: "about",
   whoami: "about",
   work: "experience",
-  cv: "resume",
+  project: "projects",
+  apps: "projects",
   i: "inspect",
   inspector: "inspect",
+  app: "clearmoneypath",
+  cmp: "clearmoneypath",
+  build: "clearmoneypath",
+  cv: "resume",
   github: "open github",
   linkedin: "open linkedin",
   social: "contact",
@@ -206,39 +240,6 @@ const allCommandNames = [
   "copy email",
   ...Object.keys(aliases),
 ];
-
-const sectionConfigs = {
-  terminal: {
-    typingSelector: null,
-    revealSelector: null,
-    focusInput: true,
-  },
-
-  about: {
-    typingSelector: ".terminal-card h2, .terminal-card p",
-    revealSelector: ".tag-list",
-  },
-
-  projects: {
-    typingSelector: ".file-card h2, .file-card p",
-    revealSelector: ".file-meta, .file-actions",
-  },
-
-  "project-inspector": {
-    typingSelector: ".project-inspector summary strong, .inspector-content p, .inspector-grid strong",
-    revealSelector: ".project-inspector summary span, .project-inspector summary em, .inspector-grid article",
-  },
-
-  clearmoneypath: {
-    typingSelector: ".build-copy h2, .build-copy p, .build-copy li",
-    revealSelector: ".eyebrow, .hero-actions, .phone-preview",
-  },
-
-  contact: {
-    typingSelector: ".contact-card h2, .contact-card p",
-    revealSelector: ".contact-links",
-  },
-};
 
 function sleep(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -265,26 +266,6 @@ function showToast(message) {
   }, 2200);
 }
 
-async function typeTextIntoElement(element, text, speed = 30) {
-  if (!element) {
-    return;
-  }
-
-  element.classList.add("is-typing");
-  element.textContent = "";
-
-  for (let index = 0; index < text.length; index += 1) {
-    element.textContent += text[index];
-
-    const character = text[index];
-    const extraDelay = character === "." || character === "," || character === ":" ? 125 : 0;
-
-    await sleep(speed + extraDelay);
-  }
-
-  element.classList.remove("is-typing");
-}
-
 async function typeHtmlLine(element, html, speed = 18) {
   const plainText = getPlainTextFromHtml(html);
 
@@ -293,269 +274,18 @@ async function typeHtmlLine(element, html, speed = 18) {
 
   for (let index = 0; index < plainText.length; index += 1) {
     element.textContent += plainText[index];
-    await sleep(speed);
+
+    const character = plainText[index];
+    const extraDelay = character === "." || character === "," || character === ":" ? 110 : 0;
+
+    await sleep(speed + extraDelay);
   }
 
   element.classList.remove("is-typing");
   element.innerHTML = html;
 }
 
-function storeOriginalText(element) {
-  if (!element || element.dataset.originalText) {
-    return;
-  }
-
-  element.dataset.originalText = element.textContent.trim();
-}
-
-function resetTypingTargets(section, selector) {
-  if (!selector) {
-    return [];
-  }
-
-  const targets = Array.from(section.querySelectorAll(selector));
-
-  return targets
-    .map((element) => {
-      storeOriginalText(element);
-
-      return {
-        element,
-        text: element.dataset.originalText || element.textContent.trim(),
-      };
-    })
-    .filter((target) => target.text.length > 0);
-}
-
-function resetRevealTargets(section, selector) {
-  if (!selector) {
-    return [];
-  }
-
-  return Array.from(section.querySelectorAll(selector));
-}
-
-async function typeSectionContent(section, config) {
-  if (!config || !config.typingSelector) {
-    return;
-  }
-
-  const typingTargets = resetTypingTargets(section, config.typingSelector);
-  const revealTargets = resetRevealTargets(section, config.revealSelector);
-
-  typingTargets.forEach((target) => {
-    target.element.textContent = "";
-    target.element.classList.add("typing-target");
-  });
-
-  revealTargets.forEach((target) => {
-    target.classList.remove("typing-reveal-visible");
-    target.classList.add("typing-reveal");
-  });
-
-  await sleep(160);
-
-  for (const target of typingTargets) {
-    const tagName = target.element.tagName.toLowerCase();
-
-    let speed = 18;
-
-    if (tagName === "h2" || tagName === "strong") {
-      speed = 24;
-    }
-
-    if (tagName === "li") {
-      speed = 15;
-    }
-
-    await typeTextIntoElement(target.element, target.text, speed);
-    await sleep(110);
-  }
-
-  revealTargets.forEach((target) => {
-    target.classList.add("typing-reveal-visible");
-  });
-}
-
-function getSectionContent(section) {
-  return Array.from(section.children).find((child) => {
-    return !child.classList.contains("section-label");
-  });
-}
-
-function createButtonFromLabel(section) {
-  const label = section.querySelector(".section-label");
-  const labelText = label?.querySelector("p");
-
-  if (!label || !labelText || label.querySelector(".section-command-button")) {
-    return null;
-  }
-
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "section-command-button";
-  button.innerHTML = labelText.innerHTML;
-  button.setAttribute("aria-expanded", "false");
-
-  label.replaceChild(button, labelText);
-
-  return button;
-}
-
-function collapseSection(section, button) {
-  section.classList.remove("section-command-open");
-  section.classList.add("section-command-collapsed");
-
-  if (button) {
-    button.setAttribute("aria-expanded", "false");
-    button.classList.remove("section-command-button-active");
-  }
-}
-
-async function openSection(section, button, config) {
-  section.classList.remove("section-command-collapsed");
-  section.classList.add("section-command-open");
-
-  if (button) {
-    button.setAttribute("aria-expanded", "true");
-    button.classList.add("section-command-button-active");
-  }
-
-  section.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-
-  await sleep(430);
-
-  if (section.id === "terminal") {
-    await typeInteractiveIntro(true);
-
-    if (terminalInput) {
-      terminalInput.focus();
-    }
-
-    return;
-  }
-
-  await typeSectionContent(section, config);
-}
-
-function initialiseClickableSections() {
-  Object.keys(sectionConfigs).forEach((sectionId) => {
-    const section = document.getElementById(sectionId);
-
-    if (!section) {
-      return;
-    }
-
-    const button = createButtonFromLabel(section) || section.querySelector(".section-command-button");
-
-    if (!button) {
-      return;
-    }
-
-    collapseSection(section, button);
-
-    if (button.dataset.sectionHandlerAttached === "true") {
-      return;
-    }
-
-    button.dataset.sectionHandlerAttached = "true";
-
-    button.addEventListener("click", async (event) => {
-      event.preventDefault();
-
-      const isOpen = section.classList.contains("section-command-open");
-
-      if (isOpen) {
-        collapseSection(section, button);
-        return;
-      }
-
-      await openSection(section, button, sectionConfigs[sectionId]);
-    });
-  });
-}
-
-async function typeTerminalWindow(terminalWindow) {
-  if (!terminalWindow || terminalWindow.dataset.typed === "true") {
-    return;
-  }
-
-  terminalWindow.dataset.typed = "true";
-
-  const typingTargets = terminalWindow.querySelectorAll(
-    ".window-header p, .command, .system-line, h1, .hero-copy"
-  );
-
-  const revealTargets = terminalWindow.querySelectorAll(
-    ".hero-actions, .status-grid"
-  );
-
-  const savedTargets = [];
-
-  typingTargets.forEach((target) => {
-    const originalText = target.textContent.trim();
-
-    if (!originalText) {
-      return;
-    }
-
-    savedTargets.push({
-      element: target,
-      text: originalText,
-    });
-
-    target.textContent = "";
-    target.classList.add("typing-target");
-  });
-
-  revealTargets.forEach((target) => {
-    target.classList.add("typing-reveal");
-  });
-
-  await sleep(180);
-
-  for (const target of savedTargets) {
-    let speed = 30;
-
-    if (target.element.tagName.toLowerCase() === "h1") {
-      speed = 26;
-    }
-
-    if (target.element.classList.contains("hero-copy")) {
-      speed = 22;
-    }
-
-    await typeTextIntoElement(target.element, target.text, speed);
-    await sleep(160);
-  }
-
-  revealTargets.forEach((target) => {
-    target.classList.add("typing-reveal-visible");
-  });
-}
-
-async function typeInteractiveIntro(forceRestart = false) {
-  if (!terminalOutput) {
-    return;
-  }
-
-  if (terminalOutput.dataset.typed === "true" && !forceRestart) {
-    return;
-  }
-
-  terminalOutput.dataset.typed = "true";
-  terminalOutput.innerHTML = "";
-
-  await printLine("<span class='terminal-success'>Welcome to TechGnomo OS.</span>", "", true);
-  await printLine("Type <strong>help</strong> to see available commands.", "", true);
-  await printLine("Use ? and ? to navigate your command history.", "", true);
-  await printLine("Use Tab to autocomplete commands.", "", true);
-}
-
-async function printLine(content, className = "", typed = false) {
+async function printLine(content, className = "", typed = true) {
   if (!terminalOutput) {
     return;
   }
@@ -581,48 +311,7 @@ async function printLine(content, className = "", typed = false) {
 function normalizeCommand(rawCommand) {
   const command = rawCommand.trim().toLowerCase().replace(/\s+/g, " ");
 
-  if (aliases[command]) {
-    return aliases[command];
-  }
-
-  return command;
-}
-
-function focusTerminal() {
-  const terminalSection = document.getElementById("terminal");
-
-  if (terminalSection && terminalSection.classList.contains("section-command-collapsed")) {
-    const terminalButton = terminalSection.querySelector(".section-command-button");
-    openSection(terminalSection, terminalButton, sectionConfigs.terminal);
-  }
-
-  if (terminalSection) {
-    terminalSection.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }
-
-  window.setTimeout(() => {
-    if (terminalInput) {
-      terminalInput.focus();
-    }
-  }, 450);
-
-  showToast("Terminal focused");
-}
-
-function scrollToSection(id) {
-  const target = document.getElementById(id);
-
-  if (!target) {
-    return;
-  }
-
-  target.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
+  return aliases[command] || command;
 }
 
 async function copyText(value) {
@@ -653,11 +342,12 @@ async function runCommand(rawCommand) {
 
   commandHistoryIndex = commandHistory.length;
 
-  await printLine(`guest@techgnomo-os:~$ ${command}`, "terminal-line-command", false);
+  setActiveDockButton(command);
+
+  await printLine(`guest@techgnomoOS:~$ ${command}`, "terminal-command", false);
 
   if (command === "clear") {
     terminalOutput.innerHTML = "";
-    await printLine("<span class='terminal-success'>Terminal cleared.</span>", "", true);
 
     terminalBusy = false;
 
@@ -677,7 +367,8 @@ async function runCommand(rawCommand) {
       ? "ALT_THEME"
       : "DEFAULT_THEME";
 
-    await printLine(`<span class='terminal-success'>Theme switched:</span> ${themeName}`, "", true);
+    await printLine(`<span class='terminal-success'>Theme switched:</span> ${themeName}`);
+    showToast(`Theme: ${themeName}`);
 
     terminalBusy = false;
 
@@ -686,7 +377,6 @@ async function runCommand(rawCommand) {
       terminalInput.focus();
     }
 
-    showToast(`Theme: ${themeName}`);
     return;
   }
 
@@ -695,10 +385,10 @@ async function runCommand(rawCommand) {
     const copied = await copyText(email);
 
     if (copied) {
-      await printLine(`<span class='terminal-success'>Copied email:</span> ${email}`, "", true);
+      await printLine(`<span class='terminal-success'>Copied email:</span> ${email}`);
       showToast("Email copied");
     } else {
-      await printLine(`<span class='terminal-warning'>Copy unavailable.</span> Email: ${email}`, "", true);
+      await printLine(`<span class='terminal-warning'>Copy unavailable.</span> Email: ${email}`);
       showToast("Copy unavailable");
     }
 
@@ -713,8 +403,9 @@ async function runCommand(rawCommand) {
   }
 
   if (!commands[command]) {
-    await printLine(`<span class='terminal-error'>Command not found:</span> ${command}`, "", true);
-    await printLine("Type <strong>help</strong> to see available commands.", "", true);
+    await printLine(`<span class='terminal-error'>Command not found:</span> ${command}`);
+    await printLine("Type <strong>help</strong> to see available commands.");
+    showToast("Unknown command");
 
     terminalBusy = false;
 
@@ -723,40 +414,11 @@ async function runCommand(rawCommand) {
       terminalInput.focus();
     }
 
-    showToast("Unknown command");
     return;
   }
 
   for (const line of commands[command]) {
-    await printLine(line, "", true);
-  }
-
-  if (command === "inspect") {
-    const inspectorSection = document.getElementById("project-inspector");
-    const inspectorButton = inspectorSection?.querySelector(".section-command-button");
-
-    if (inspectorSection && inspectorSection.classList.contains("section-command-collapsed")) {
-      window.setTimeout(() => {
-        openSection(inspectorSection, inspectorButton, sectionConfigs["project-inspector"]);
-      }, 300);
-    } else {
-      window.setTimeout(() => scrollToSection("project-inspector"), 300);
-    }
-
-    showToast("Opening Project Inspector");
-  }
-
-  if (command === "clearmoneypath") {
-    const appSection = document.getElementById("clearmoneypath");
-    const appButton = appSection?.querySelector(".section-command-button");
-
-    if (appSection && appSection.classList.contains("section-command-collapsed")) {
-      window.setTimeout(() => {
-        openSection(appSection, appButton, sectionConfigs.clearmoneypath);
-      }, 300);
-    } else {
-      window.setTimeout(() => scrollToSection("clearmoneypath"), 300);
-    }
+    await printLine(line);
   }
 
   terminalBusy = false;
@@ -765,6 +427,18 @@ async function runCommand(rawCommand) {
     terminalInput.disabled = false;
     terminalInput.focus();
   }
+}
+
+function setActiveDockButton(command) {
+  commandButtons.forEach((button) => {
+    const buttonCommand = normalizeCommand(button.dataset.command || "");
+
+    if (buttonCommand === command) {
+      button.classList.add("active");
+    } else {
+      button.classList.remove("active");
+    }
+  });
 }
 
 function updateClock() {
@@ -778,44 +452,6 @@ function updateClock() {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-  });
-}
-
-function updateActiveDockLink() {
-  const dockLinks = document.querySelectorAll(".os-dock a[href^='#']");
-  const sections = Array.from(document.querySelectorAll("main[id], section[id]"));
-
-  let currentId = "home";
-
-  sections.forEach((section) => {
-    const sectionTop = section.getBoundingClientRect().top;
-
-    if (sectionTop <= 180) {
-      currentId = section.id;
-    }
-  });
-
-  dockLinks.forEach((link) => {
-    const href = link.getAttribute("href");
-
-    if (href === `#${currentId}`) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
-  });
-}
-
-function requestActiveDockUpdate() {
-  if (scrollTicking) {
-    return;
-  }
-
-  scrollTicking = true;
-
-  window.requestAnimationFrame(() => {
-    updateActiveDockLink();
-    scrollTicking = false;
   });
 }
 
@@ -841,26 +477,10 @@ function autocompleteCommand() {
   }
 }
 
-function createBootInputPrompt() {
-  if (!bootScreen) {
-    return;
+function focusTerminal() {
+  if (terminalInput) {
+    terminalInput.focus();
   }
-
-  if (bootScreen.querySelector(".boot-input-prompt")) {
-    return;
-  }
-
-  const bootTerminal = bootScreen.querySelector(".boot-terminal");
-
-  if (!bootTerminal) {
-    return;
-  }
-
-  const prompt = document.createElement("p");
-  prompt.className = "boot-input-prompt";
-  prompt.textContent = "Press any key / click / tap / scroll to enter interface";
-
-  bootTerminal.appendChild(prompt);
 }
 
 async function startInterface() {
@@ -874,13 +494,10 @@ async function startInterface() {
     bootScreen.classList.add("hidden");
   }
 
-  await sleep(320);
+  await sleep(420);
 
-  const firstTerminalWindow = document.querySelector(".terminal-window");
-
-  if (firstTerminalWindow) {
-    typeTerminalWindow(firstTerminalWindow);
-  }
+  focusTerminal();
+  await runCommand("home");
 }
 
 function waitForUserInputToStart() {
@@ -888,12 +505,6 @@ function waitForUserInputToStart() {
     startInterface();
     return;
   }
-
-  createBootInputPrompt();
-
-  window.setTimeout(() => {
-    bootScreen.classList.add("boot-ready");
-  }, 900);
 
   const startEvents = ["pointerdown", "keydown", "touchstart", "wheel"];
 
@@ -915,28 +526,9 @@ function waitForUserInputToStart() {
 
 window.addEventListener("load", () => {
   updateClock();
-  updateActiveDockLink();
-  initialiseClickableSections();
-
   window.setInterval(updateClock, 1000);
-
   waitForUserInputToStart();
 });
-
-window.addEventListener("scroll", requestActiveDockUpdate, { passive: true });
-window.addEventListener("resize", requestActiveDockUpdate);
-
-if (menuButton && mobileMenu) {
-  menuButton.addEventListener("click", () => {
-    mobileMenu.classList.toggle("open");
-  });
-
-  mobileMenu.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      mobileMenu.classList.remove("open");
-    });
-  });
-}
 
 if (terminalForm && terminalInput && terminalOutput) {
   terminalForm.addEventListener("submit", async (event) => {
@@ -977,13 +569,7 @@ if (terminalForm && terminalInput && terminalOutput) {
     }
   });
 
-  terminalOutput.addEventListener("click", () => {
-    terminalInput.focus();
-  });
-}
-
-if (focusTerminalButton) {
-  focusTerminalButton.addEventListener("click", focusTerminal);
+  terminalOutput.addEventListener("click", focusTerminal);
 }
 
 document.addEventListener("keydown", async (event) => {
@@ -1015,38 +601,3 @@ commandButtons.forEach((button) => {
     await runCommand(command);
   });
 });
-
-const animatedCards = document.querySelectorAll(
-  ".terminal-card, .file-card, .current-build, .interactive-terminal, .system-dashboard, .project-inspector"
-);
-
-if ("IntersectionObserver" in window) {
-  const cardObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.animate(
-            [
-              { opacity: 0, transform: "translateY(18px)" },
-              { opacity: 1, transform: "translateY(0)" },
-            ],
-            {
-              duration: 520,
-              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-              fill: "both",
-            }
-          );
-
-          cardObserver.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.12,
-    }
-  );
-
-  animatedCards.forEach((card) => {
-    cardObserver.observe(card);
-  });
-}
