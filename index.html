@@ -50,6 +50,16 @@
       </button>
     </header>
 
+    <div class="os-dock" aria-label="TechGnomo OS quick navigation">
+      <a href="#home">home</a>
+      <a href="#terminal">terminal</a>
+      <a href="#projects">projects</a>
+      <a href="#project-inspector">inspect</a>
+      <a href="#contact">connect</a>
+      <button type="button" id="focusTerminalButton">focus terminal</button>
+      <span id="localClock">--:--:--</span>
+    </div>
+
     <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
       <a href="#terminal">terminal</a>
       <a href="#about">whoami</a>
@@ -138,6 +148,9 @@
           <button type="button" data-command="projects">projects</button>
           <button type="button" data-command="clearmoneypath">clearmoneypath</button>
           <button type="button" data-command="contact">contact</button>
+          <button type="button" data-command="stack">stack</button>
+          <button type="button" data-command="roadmap">roadmap</button>
+          <button type="button" data-command="resume">resume</button>
           <button type="button" data-command="clear">clear</button>
         </div>
 
@@ -267,6 +280,163 @@
       </div>
     </section>
 
+    
+    <section class="section-grid" id="project-inspector">
+      <div class="section-label">
+        <p>$ inspect /projects</p>
+      </div>
+
+      <div class="project-inspector">
+        <details open>
+          <summary>
+            <span>01</span>
+            <strong>ClearMoneyPath.app</strong>
+            <em>MVP_IN_DEVELOPMENT</em>
+          </summary>
+
+          <div class="inspector-content">
+            <p>
+              Mobile-first pay cycle planner built to help people understand what to pay,
+              what to save and what is safe to spend before the next payday.
+            </p>
+
+            <div class="inspector-grid">
+              <article>
+                <span>STACK</span>
+                <strong>React Native / Expo / Firebase</strong>
+              </article>
+
+              <article>
+                <span>CORE FEATURE</span>
+                <strong>Safe to Spend</strong>
+              </article>
+
+              <article>
+                <span>USER PROBLEM</span>
+                <strong>Payday clarity and debt control</strong>
+              </article>
+
+              <article>
+                <span>NEXT ACTION</span>
+                <strong>Prepare store-ready version</strong>
+              </article>
+            </div>
+          </div>
+        </details>
+
+        <details>
+          <summary>
+            <span>02</span>
+            <strong>BudgetPlanner.web</strong>
+            <em>LIVE_DEMO</em>
+          </summary>
+
+          <div class="inspector-content">
+            <p>
+              A practical budgeting demo designed to organise income, bills, debts,
+              savings and weekly spending money.
+            </p>
+
+            <div class="inspector-grid">
+              <article>
+                <span>STACK</span>
+                <strong>HTML / CSS / JavaScript</strong>
+              </article>
+
+              <article>
+                <span>CORE FEATURE</span>
+                <strong>Budget overview</strong>
+              </article>
+
+              <article>
+                <span>USER PROBLEM</span>
+                <strong>Knowing where money goes</strong>
+              </article>
+
+              <article>
+                <span>NEXT ACTION</span>
+                <strong>Keep as portfolio demo</strong>
+              </article>
+            </div>
+          </div>
+        </details>
+
+        <details>
+          <summary>
+            <span>03</span>
+            <strong>HospitalityRoster.tool</strong>
+            <em>PORTFOLIO_PROJECT</em>
+          </summary>
+
+          <div class="inspector-content">
+            <p>
+              Roster planning concept based on real hospitality operations, shift pressure,
+              staff availability and simple scheduling needs.
+            </p>
+
+            <div class="inspector-grid">
+              <article>
+                <span>STACK</span>
+                <strong>Web app concept</strong>
+              </article>
+
+              <article>
+                <span>CORE FEATURE</span>
+                <strong>Shift planning</strong>
+              </article>
+
+              <article>
+                <span>USER PROBLEM</span>
+                <strong>Managing staff availability</strong>
+              </article>
+
+              <article>
+                <span>NEXT ACTION</span>
+                <strong>Build interactive prototype</strong>
+              </article>
+            </div>
+          </div>
+        </details>
+
+        <details>
+          <summary>
+            <span>04</span>
+            <strong>MotorcycleTracker.app</strong>
+            <em>CONCEPT</em>
+          </summary>
+
+          <div class="inspector-content">
+            <p>
+              Motorcycle maintenance tracker concept for services, tyres, fuel,
+              reminders, costs and ownership notes.
+            </p>
+
+            <div class="inspector-grid">
+              <article>
+                <span>STACK</span>
+                <strong>Mobile app concept</strong>
+              </article>
+
+              <article>
+                <span>CORE FEATURE</span>
+                <strong>Maintenance reminders</strong>
+              </article>
+
+              <article>
+                <span>USER PROBLEM</span>
+                <strong>Tracking service history</strong>
+              </article>
+
+              <article>
+                <span>NEXT ACTION</span>
+                <strong>Design first prototype</strong>
+              </article>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
     <section class="section-grid" id="clearmoneypath">
       <div class="section-label">
         <p>$ open /projects/ClearMoneyPath.app</p>
@@ -359,4 +529,6 @@
   <script src="script.js"></script>
 </body>
 </html>
+
+
 

@@ -5,6 +5,8 @@ const terminalForm = document.getElementById("terminalForm");
 const terminalInput = document.getElementById("terminalInput");
 const terminalOutput = document.getElementById("terminalOutput");
 const commandButtons = document.querySelectorAll("[data-command]");
+const focusTerminalButton = document.getElementById("focusTerminalButton");
+const localClock = document.getElementById("localClock");
 
 let terminalBusy = false;
 let commandHistory = [];
@@ -14,19 +16,25 @@ const commands = {
   help: [
     "<span class='terminal-success'>Available commands:</span>",
     "about              Show who Fabio / TechGnomo is",
+    "experience         Show hospitality + tech background",
     "skills             Show current technical skills",
     "projects           List portfolio projects",
     "clearmoneypath     Open current build information",
     "status             Show current system status",
     "roadmap            Show next development goals",
     "stack              Show the technology stack",
+    "resume             Show resume summary",
+    "goals              Show current career goals",
     "contact            Show contact links",
     "links              Show external links",
     "open portfolio     Open the current TechGnomo portfolio",
     "open app           Open the ClearMoneyPath product page",
     "clear              Clear terminal output",
     "",
-    "Tip: you can use the quick command buttons under the terminal.",
+    "Shortcuts:",
+    "/                  Focus terminal",
+    "Ctrl + K           Clear terminal",
+    "? / ?              Navigate command history",
   ],
 
   about: [
@@ -34,6 +42,13 @@ const commands = {
     "Hospitality manager moving into junior web development, software development and IT support.",
     "Current focus: practical tools, mobile apps, web projects and simple systems that solve real problems.",
     "Location: Queensland, Australia.",
+  ],
+
+  experience: [
+    "<span class='terminal-success'>Experience profile:</span>",
+    "Hospitality management background with real-world business operations experience.",
+    "Strong understanding of customer pressure, staff coordination, budgets, time limits and operational problems.",
+    "Currently translating that practical experience into web apps, mobile apps and IT support skills.",
   ],
 
   skills: [
@@ -93,6 +108,23 @@ const commands = {
     "Design style: terminal UI, OS dashboard, hacker portfolio",
   ],
 
+  resume: [
+    "<span class='terminal-success'>Resume summary:</span>",
+    "Name: Fabio D&apos;Anna",
+    "Focus: Junior Web Developer / Junior Software Developer / IT Support",
+    "Current build: ClearMoneyPath",
+    "Strength: combining hospitality management experience with practical software problem solving.",
+    "Portfolio: https://techgnomo.com",
+  ],
+
+  goals: [
+    "<span class='terminal-success'>Current goals:</span>",
+    "01. Complete and polish ClearMoneyPath",
+    "02. Build a stronger developer portfolio",
+    "03. Prepare for junior developer / IT support opportunities",
+    "04. Keep building useful real-world projects",
+  ],
+
   contact: [
     "<span class='terminal-success'>Connection options:</span>",
     "<a class='terminal-link' href='mailto:gnomocode@gmail.com'>gnomocode@gmail.com</a>",
@@ -129,6 +161,9 @@ const aliases = {
   build: "clearmoneypath",
   me: "about",
   whoami: "about",
+  work: "experience",
+  cv: "resume",
+  social: "contact",
   socials: "contact",
   email: "contact",
 };
@@ -283,6 +318,23 @@ function normalizeCommand(rawCommand) {
   return command;
 }
 
+function focusTerminal() {
+  const terminalSection = document.getElementById("terminal");
+
+  if (terminalSection) {
+    terminalSection.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
+  window.setTimeout(() => {
+    if (terminalInput) {
+      terminalInput.focus();
+    }
+  }, 450);
+}
+
 async function runCommand(rawCommand) {
   const command = normalizeCommand(rawCommand);
 
@@ -344,7 +396,24 @@ async function runCommand(rawCommand) {
   }
 }
 
+function updateClock() {
+  if (!localClock) {
+    return;
+  }
+
+  const now = new Date();
+
+  localClock.textContent = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
 window.addEventListener("load", async () => {
+  updateClock();
+  window.setInterval(updateClock, 1000);
+
   await sleep(1200);
 
   if (bootScreen) {
@@ -411,6 +480,28 @@ if (terminalForm && terminalInput && terminalOutput) {
   });
 }
 
+if (focusTerminalButton) {
+  focusTerminalButton.addEventListener("click", focusTerminal);
+}
+
+document.addEventListener("keydown", async (event) => {
+  const activeTag = document.activeElement?.tagName?.toLowerCase();
+  const isTypingInInput = activeTag === "input" || activeTag === "textarea";
+
+  if (event.key === "/" && !isTypingInInput) {
+    event.preventDefault();
+    focusTerminal();
+  }
+
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+
+    if (!terminalBusy && terminalOutput) {
+      await runCommand("clear");
+    }
+  }
+});
+
 commandButtons.forEach((button) => {
   button.addEventListener("click", async () => {
     const command = button.dataset.command;
@@ -424,7 +515,7 @@ commandButtons.forEach((button) => {
 });
 
 const animatedCards = document.querySelectorAll(
-  ".terminal-card, .file-card, .current-build, .interactive-terminal, .system-dashboard"
+  ".terminal-card, .file-card, .current-build, .interactive-terminal, .system-dashboard, .project-inspector"
 );
 
 if ("IntersectionObserver" in window) {
@@ -501,5 +592,3 @@ if ("IntersectionObserver" in window) {
 
   typeInteractiveIntro();
 }
-
-
