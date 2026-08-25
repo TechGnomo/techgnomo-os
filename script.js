@@ -11,6 +11,7 @@ let terminalBusy = false;
 let commandHistory = [];
 let commandHistoryIndex = -1;
 let toastTimer = null;
+let skipTypingRequested = false;
 
 const commands = {
   home: [
@@ -55,6 +56,7 @@ const commands = {
     "/                  Focus terminal",
     "Ctrl + K           Clear terminal",
     "Tab                Autocomplete command",
+    "Double click terminal  Skip current typing animation",
     "? / ?              Navigate command history",
   ],
 
@@ -272,7 +274,19 @@ async function typeHtmlLine(element, html, speed = 18) {
   element.classList.add("is-typing");
   element.textContent = "";
 
+  if (skipTypingRequested) {
+    element.classList.remove("is-typing");
+    element.innerHTML = html;
+    return;
+  }
+
   for (let index = 0; index < plainText.length; index += 1) {
+    if (skipTypingRequested) {
+      element.classList.remove("is-typing");
+      element.innerHTML = html;
+      return;
+    }
+
     element.textContent += plainText[index];
 
     const character = plainText[index];
@@ -329,6 +343,8 @@ async function runCommand(rawCommand) {
   if (!command || terminalBusy) {
     return;
   }
+
+  skipTypingRequested = false;
 
   terminalBusy = true;
 
@@ -570,6 +586,13 @@ if (terminalForm && terminalInput && terminalOutput) {
   });
 
   terminalOutput.addEventListener("click", focusTerminal);
+
+  terminalOutput.addEventListener("dblclick", () => {
+    if (terminalBusy) {
+      skipTypingRequested = true;
+      showToast("Typing animation skipped");
+    }
+  });
 }
 
 document.addEventListener("keydown", async (event) => {
@@ -601,3 +624,4 @@ commandButtons.forEach((button) => {
     await runCommand(command);
   });
 });
+
