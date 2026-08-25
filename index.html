@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>TechGnomo OS | Fabio D'Anna</title>
+
+  <meta
+    name="description"
+    content="TechGnomo OS is the terminal-style portfolio of Fabio D'Anna, a junior developer building practical web and mobile tools."
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-terminal">
+      <p>[BOOT] Initialising TechGnomo OS...</p>
+      <p>[OK] Loading portfolio modules</p>
+      <p>[OK] Mounting projects directory</p>
+      <p>[OK] Guest access granted</p>
+      <p class="boot-cursor">Starting interface_</p>
+    </div>
+  </div>
+
+  <main class="os-shell" id="home">
+    <header class="top-bar">
+      <a class="brand" href="#home" aria-label="TechGnomo OS home">
+        <span class="brand-mark">TG</span>
+        <span>
+          <strong>TechGnomo OS</strong>
+          <small>v1.0 / guest session</small>
+        </span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#about">whoami</a>
+        <a href="#projects">projects</a>
+        <a href="#clearmoneypath">current_build</a>
+        <a href="#contact">connect</a>
+      </nav>
+
+      <button class="menu-button" id="menuButton" type="button" aria-label="Open menu">
+        <span></span>
+        <span></span>
+      </button>
+    </header>
+
+    <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
+      <a href="#about">whoami</a>
+      <a href="#projects">projects</a>
+      <a href="#clearmoneypath">current_build</a>
+      <a href="#contact">connect</a>
+    </nav>
+
+    <section class="hero terminal-window">
+      <div class="window-header">
+        <div class="window-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <p>/home/guest/techgnomo</p>
+      </div>
+
+      <div class="terminal-content">
+        <p class="command">$ boot techgnomo-os</p>
+        <p class="system-line">GUEST_ACCESS_GRANTED</p>
+
+        <h1>
+          Hospitality manager turned junior developer, building practical tools for real-world problems.
+        </h1>
+
+        <p class="hero-copy">
+          I build clean, useful digital products with a focus on budgeting, productivity,
+          hospitality operations and simple software that actually helps people.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#projects" class="button primary">open /projects</a>
+          <a href="#contact" class="button secondary">connect --email</a>
+        </div>
+
+        <div class="status-grid" aria-label="TechGnomo status">
+          <article>
+            <span>SYS.NAME</span>
+            <strong>Fabio D'Anna</strong>
+          </article>
+
+          <article>
+            <span>LOCATION</span>
+            <strong>QLD, Australia</strong>
+          </article>
+
+          <article>
+            <span>FOCUS</span>
+            <strong>Web / Mobile / IT</strong>
+          </article>
+
+          <article>
+            <span>CURRENT_BUILD</span>
+            <strong>ClearMoneyPath</strong>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid" id="about">
+      <div class="section-label">
+        <p>$ whoami</p>
+      </div>
+
+      <div class="terminal-card">
+        <h2>About me</h2>
+
+        <p>
+          I am Fabio, also known as TechGnomo. I am currently moving from hospitality management
+          into web development, software development and IT support.
+        </p>
+
+        <p>
+          My background gives me a practical advantage: I understand real business problems,
+          busy teams, customer pressure, money stress and the need for tools that are simple,
+          clear and fast to use.
+        </p>
+
+        <div class="tag-list">
+          <span>HTML</span>
+          <span>CSS</span>
+          <span>JavaScript</span>
+          <span>React Native</span>
+          <span>Expo</span>
+          <span>Firebase</span>
+          <span>GitHub</span>
+          <span>IT Support</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid" id="projects">
+      <div class="section-label">
+        <p>$ ls -la /projects</p>
+      </div>
+
+      <div class="file-list">
+        <article class="file-card featured">
+          <div class="file-meta">
+            <span class="file-type">APP</span>
+            <span class="file-status">MVP_IN_DEVELOPMENT</span>
+          </div>
+
+          <h2>ClearMoneyPath.app</h2>
+
+          <p>
+            A mobile-first pay cycle planner that helps users know what to pay,
+            what to save and what is safe to spend before the next payday.
+          </p>
+
+          <div class="file-actions">
+            <a href="#clearmoneypath">open file</a>
+            <a href="https://techgnomo.com/clearmoneypath.html" target="_blank" rel="noopener">view landing page</a>
+          </div>
+        </article>
+
+        <article class="file-card">
+          <div class="file-meta">
+            <span class="file-type">WEB</span>
+            <span class="file-status">LIVE_DEMO</span>
+          </div>
+
+          <h2>BudgetPlanner.web</h2>
+
+          <p>
+            A practical budgeting demo built to organise income, fixed costs,
+            debt payments and spending money.
+          </p>
+
+          <div class="file-actions">
+            <a href="https://techgnomo.com/project.html" target="_blank" rel="noopener">view project</a>
+          </div>
+        </article>
+
+        <article class="file-card">
+          <div class="file-meta">
+            <span class="file-type">TOOL</span>
+            <span class="file-status">PORTFOLIO_PROJECT</span>
+          </div>
+
+          <h2>HospitalityRoster.tool</h2>
+
+          <p>
+            A roster-focused concept designed around real restaurant operations,
+            team availability and simple shift planning.
+          </p>
+
+          <div class="file-actions">
+            <a href="https://techgnomo.com/project.html" target="_blank" rel="noopener">view project</a>
+          </div>
+        </article>
+
+        <article class="file-card">
+          <div class="file-meta">
+            <span class="file-type">APP</span>
+            <span class="file-status">CONCEPT</span>
+          </div>
+
+          <h2>MotorcycleTracker.app</h2>
+
+          <p>
+            A motorcycle maintenance tracker concept for services, tyres, fuel,
+            notes and ownership costs.
+          </p>
+
+          <div class="file-actions">
+            <a href="https://techgnomo.com/project.html" target="_blank" rel="noopener">view project</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-grid" id="clearmoneypath">
+      <div class="section-label">
+        <p>$ open /projects/ClearMoneyPath.app</p>
+      </div>
+
+      <div class="current-build">
+        <div class="build-copy">
+          <span class="eyebrow">CURRENT_BUILD</span>
+
+          <h2>ClearMoneyPath</h2>
+
+          <p>
+            ClearMoneyPath is a mobile-first pay cycle planner for people who want
+            to know exactly what to pay, what to save, what is safe to spend and
+            how long until they are debt-free.
+          </p>
+
+          <ul>
+            <li>Pay cycle planning for weekly, fortnightly and monthly income.</li>
+            <li>Safe to Spend calculation before the next payday.</li>
+            <li>Debt-free countdown and simple financial clarity.</li>
+            <li>Built with React Native, Expo and Firebase.</li>
+          </ul>
+
+          <div class="hero-actions">
+            <a href="https://techgnomo.com/clearmoneypath.html" target="_blank" rel="noopener" class="button primary">
+              view product page
+            </a>
+            <a href="#contact" class="button secondary">
+              ask about the build
+            </a>
+          </div>
+        </div>
+
+        <div class="phone-preview" aria-label="ClearMoneyPath phone preview">
+          <div class="phone-top"></div>
+          <div class="phone-screen">
+            <p class="phone-label">SAFE TO SPEND</p>
+            <strong>$186.40</strong>
+            <span>until next payday</span>
+
+            <div class="phone-row">
+              <small>Bills</small>
+              <b>$740.00</b>
+            </div>
+
+            <div class="phone-row">
+              <small>Savings</small>
+              <b>$300.00</b>
+            </div>
+
+            <div class="phone-row">
+              <small>Debt</small>
+              <b>$15.5k</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid" id="contact">
+      <div class="section-label">
+        <p>$ connect --profile</p>
+      </div>
+
+      <div class="terminal-card contact-card">
+        <h2>Let’s build something practical.</h2>
+
+        <p>
+          I am open to junior web development, junior software development,
+          IT support opportunities and practical digital projects.
+        </p>
+
+        <div class="contact-links">
+          <a href="mailto:gnomocode@gmail.com">gnomocode@gmail.com</a>
+          <a href="https://github.com/TechGnomo" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.linkedin.com/in/fabio-d-anna-5083b5378/" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://techgnomo.com" target="_blank" rel="noopener">Current Portfolio</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>TechGnomo OS · Built by Fabio D'Anna</p>
+      <a href="#home">back to top ?</a>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
