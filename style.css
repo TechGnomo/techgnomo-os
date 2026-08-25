@@ -1,11 +1,13 @@
 :root {
-  --bg: #060807;
-  --panel: rgba(14, 22, 19, 0.86);
+  --bg: #050706;
+  --panel: rgba(14, 22, 19, 0.88);
   --panel-strong: #101a16;
   --green: #37ff8b;
   --green-soft: rgba(55, 255, 139, 0.14);
   --cyan: #6ee7ff;
   --orange: #ffb86b;
+  --red: #ff6b6b;
+  --yellow: #ffcf5c;
   --text: #eafff2;
   --muted: #96a99d;
   --line: rgba(234, 255, 242, 0.12);
@@ -211,7 +213,8 @@ a {
   display: none;
 }
 
-.terminal-window {
+.terminal-window,
+.interactive-terminal {
   margin-top: 26px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -243,11 +246,11 @@ a {
 }
 
 .window-dots span:nth-child(1) {
-  background: #ff6b6b;
+  background: var(--red);
 }
 
 .window-dots span:nth-child(2) {
-  background: #ffcf5c;
+  background: var(--yellow);
 }
 
 .window-dots span:nth-child(3) {
@@ -404,6 +407,83 @@ h2 {
   color: var(--muted);
   font-size: 18px;
   line-height: 1.75;
+}
+
+.interactive-terminal {
+  margin-top: 0;
+}
+
+.terminal-body {
+  min-height: 330px;
+  max-height: 460px;
+  padding: 24px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.terminal-body p {
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+.terminal-body strong {
+  color: var(--text);
+}
+
+.terminal-line-command {
+  color: var(--green) !important;
+}
+
+.terminal-success {
+  color: var(--green);
+}
+
+.terminal-warning {
+  color: var(--orange);
+}
+
+.terminal-error {
+  color: var(--red);
+}
+
+.terminal-link {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.terminal-link:hover {
+  text-decoration: underline;
+}
+
+.terminal-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 18px 24px 22px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+  font-family: var(--mono);
+}
+
+.terminal-form label {
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.terminal-form input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+}
+
+.terminal-form input::placeholder {
+  color: rgba(150, 169, 157, 0.65);
 }
 
 .tag-list {
@@ -749,7 +829,78 @@ h2 {
     border-radius: 22px;
   }
 
+  .terminal-form {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .terminal-form label {
+    white-space: normal;
+  }
+
+  .terminal-form input {
+    width: 100%;
+  }
+
   .site-footer {
     flex-direction: column;
   }
 }
+
+/* =========================================================
+   REAL TYPING TERMINAL ANIMATIONS
+   ========================================================= */
+
+.typing-target,
+.terminal-body p {
+  white-space: pre-wrap;
+}
+
+.typing-target.is-typing::after,
+.terminal-body p.is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 1.1em;
+  margin-left: 4px;
+  background: var(--green);
+  vertical-align: -0.15em;
+  animation: blink 0.8s infinite;
+}
+
+.typing-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.typing-reveal.typing-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.terminal-form input:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.terminal-window h1.typing-target {
+  min-height: 2.85em;
+}
+
+.terminal-window .hero-copy.typing-target {
+  min-height: 4.8em;
+}
+
+@media (max-width: 620px) {
+  .terminal-window h1.typing-target {
+    min-height: 4.5em;
+  }
+
+  .terminal-window .hero-copy.typing-target {
+    min-height: 6.5em;
+  }
+}
+
