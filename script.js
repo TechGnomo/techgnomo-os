@@ -143,7 +143,7 @@ function getPlainTextFromHtml(html) {
   return temporaryElement.textContent || temporaryElement.innerText || "";
 }
 
-async function typeTextIntoElement(element, text, speed = 34) {
+async function typeTextIntoElement(element, text, speed = 30) {
   if (!element) {
     return;
   }
@@ -155,7 +155,7 @@ async function typeTextIntoElement(element, text, speed = 34) {
     element.textContent += text[index];
 
     const character = text[index];
-    const extraDelay = character === "." || character === "," || character === ":" ? 145 : 0;
+    const extraDelay = character === "." || character === "," || character === ":" ? 125 : 0;
 
     await sleep(speed + extraDelay);
   }
@@ -163,7 +163,7 @@ async function typeTextIntoElement(element, text, speed = 34) {
   element.classList.remove("is-typing");
 }
 
-async function typeHtmlLine(element, html, speed = 22) {
+async function typeHtmlLine(element, html, speed = 18) {
   const plainText = getPlainTextFromHtml(html);
 
   element.classList.add("is-typing");
@@ -218,14 +218,14 @@ async function typeTerminalWindow(terminalWindow) {
   await sleep(180);
 
   for (const target of savedTargets) {
-    let speed = 34;
+    let speed = 30;
 
     if (target.element.tagName.toLowerCase() === "h1") {
-      speed = 30;
+      speed = 26;
     }
 
     if (target.element.classList.contains("hero-copy")) {
-      speed = 26;
+      speed = 22;
     }
 
     await typeTextIntoElement(target.element, target.text, speed);
@@ -265,7 +265,7 @@ async function printLine(content, className = "", typed = false) {
   terminalOutput.scrollTop = terminalOutput.scrollHeight;
 
   if (typed) {
-    await typeHtmlLine(line, content, 22);
+    await typeHtmlLine(line, content, 18);
   } else {
     line.innerHTML = content;
   }
@@ -501,3 +501,5 @@ if ("IntersectionObserver" in window) {
 
   typeInteractiveIntro();
 }
+
+
