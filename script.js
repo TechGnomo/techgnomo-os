@@ -124,7 +124,7 @@ async function typeTextIntoElement(element, text, speed = 18) {
     element.textContent += text[index];
 
     const character = text[index];
-    const extraDelay = character === "." || character === "," || character === ":" ? 55 : 0;
+    const extraDelay = character === "." || character === "," || character === ":" ? 145 : 0;
 
     await sleep(speed + extraDelay);
   }
@@ -187,14 +187,14 @@ async function typeTerminalWindow(terminalWindow) {
   await sleep(180);
 
   for (const target of savedTargets) {
-    let speed = 14;
+    let speed = 34;
 
     if (target.element.tagName.toLowerCase() === "h1") {
-      speed = 11;
+      speed = 30;
     }
 
     if (target.element.classList.contains("hero-copy")) {
-      speed = 9;
+      speed = 26;
     }
 
     await typeTextIntoElement(target.element, target.text, speed);
@@ -233,7 +233,7 @@ async function printLine(content, className = "", typed = false) {
   terminalOutput.scrollTop = terminalOutput.scrollHeight;
 
   if (typed) {
-    await typeHtmlLine(line, content, 8);
+    await typeHtmlLine(line, content, 22);
   } else {
     line.innerHTML = content;
   }
@@ -411,3 +411,5 @@ if ("IntersectionObserver" in window) {
 
   typeInteractiveIntro();
 }
+
+
