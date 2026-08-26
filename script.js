@@ -1,221 +1,211 @@
-const bootScreen = document.getElementById("bootScreen");
-const uptime = document.getElementById("uptime");
-const projectButtons = document.querySelectorAll(".project-file");
-const terminalForm = document.getElementById("terminalForm");
-const terminalInput = document.getElementById("terminalInput");
-const terminalOutput = document.getElementById("terminalOutput");
+const root = document.documentElement;
+const header = document.getElementById("siteHeader");
+const progress = document.getElementById("pageProgress");
+const pointerGlow = document.getElementById("pointerGlow");
+const menuToggle = document.getElementById("menuToggle");
+const navigation = document.getElementById("siteNavigation");
+const briefForm = document.getElementById("briefForm");
+const formStatus = document.getElementById("formStatus");
+const year = document.getElementById("currentYear");
+const scenes = document.querySelectorAll("[data-scene]");
+const navLinks = document.querySelectorAll("[data-nav]");
+const railLinks = document.querySelectorAll("[data-rail]");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-let startedAt = Date.now();
-let bootDone = false;
-let skipTyping = false;
+root.classList.add("js");
 
-const commandMap = {
-  help: [
-    "<span class='output-success'>Available commands:</span>",
-    "whoami             show profile summary",
-    "status             show current status",
-    "projects           jump to projects",
-    "clear              clear command output",
-    "open app           open ClearMoneyPath page",
-    "contact            show contact links",
-  ],
+function trackEvent(name, details = {}) {
+  const safeName = String(name || "interaction").replace(/[^a-z0-9_]/gi, "_").toLowerCase();
 
-  whoami: [
-    "Fabio D'Anna / TechGnomo",
-    "Hospitality manager transitioning into junior web development, mobile apps and IT support.",
-    "Building practical software for real-world problems.",
-  ],
+  if (typeof window.gtag === "function") {
+    window.gtag("event", safeName, details);
+  }
 
-  status: [
-    "LOCATION    Queensland, Australia",
-    "FOCUS       Web development -- Mobile apps -- IT support",
-    "BUILDING    ClearMoneyPath.app",
-    "STATUS      online",
-  ],
-
-  projects: [
-    "Opening /projects/",
-    "Tip: click a filename to expand the project file.",
-  ],
-
-  contact: [
-    "Email: gnomocode@gmail.com",
-    "GitHub: https://github.com/TechGnomo",
-    "LinkedIn: Fabio D'Anna",
-  ],
-
-  "open app": [
-    "ClearMoneyPath product page:",
-    "<a href='https://techgnomo.com/clearmoneypath.html' target='_blank' rel='noopener'>https://techgnomo.com/clearmoneypath.html</a>",
-  ],
-};
-
-const aliases = {
-  h: "help",
-  "?": "help",
-  me: "whoami",
-  about: "whoami",
-  app: "open app",
-  cmp: "open app",
-  clearmoneypath: "open app",
-  email: "contact",
-};
-
-function sleep(ms) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
+  window.dispatchEvent(
+    new CustomEvent("techgnomo:event", {
+      detail: { name: safeName, ...details },
+    }),
+  );
 }
 
-function plainText(html) {
-  const element = document.createElement("div");
-  element.innerHTML = html;
-  return element.textContent || element.innerText || "";
+window.techGnomoTrack = trackEvent;
+
+function updateScrollState() {
+  const scrollTop = window.scrollY;
+  const scrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+  const completion = Math.min(Math.max(scrollTop / scrollable, 0), 1);
+
+  header?.classList.toggle("is-scrolled", scrollTop > 20);
+
+  if (progress) {
+    progress.style.width = `${completion * 100}%`;
+  }
+
+  const marker = window.innerHeight * 0.42;
+  let activeScene = "top";
+
+  scenes.forEach((scene) => {
+    const bounds = scene.getBoundingClientRect();
+    if (bounds.top <= marker && bounds.bottom >= marker) {
+      activeScene = scene.dataset.scene || activeScene;
+    }
+  });
+
+  setActiveScene(activeScene);
 }
 
-async function typeLine(element, html, speed = 15) {
-  const text = plainText(html);
-
-  element.classList.add("typing");
-  element.textContent = "";
-
-  for (let index = 0; index < text.length; index += 1) {
-    if (skipTyping) {
-      element.innerHTML = html;
-      element.classList.remove("typing");
+let scrollFrame;
+window.addEventListener(
+  "scroll",
+  () => {
+    if (scrollFrame) {
       return;
     }
 
-    element.textContent += text[index];
-
-    const character = text[index];
-    const delay = character === "." || character === "," || character === ":" ? 80 : 0;
-
-    await sleep(speed + delay);
-  }
-
-  element.innerHTML = html;
-  element.classList.remove("typing");
-}
-
-async function printOutput(html, className = "") {
-  const line = document.createElement("p");
-
-  if (className) {
-    line.className = className;
-  }
-
-  terminalOutput.appendChild(line);
-  await typeLine(line, html);
-}
-
-function normaliseCommand(value) {
-  const command = value.trim().toLowerCase().replace(/\s+/g, " ");
-  return aliases[command] || command;
-}
-
-async function runCommand(value) {
-  const command = normaliseCommand(value);
-
-  if (!command) {
-    return;
-  }
-
-  skipTyping = false;
-
-  await printOutput(`guest@techgnomoOS:~$ ${command}`, "output-command");
-
-  if (command === "clear") {
-    terminalOutput.innerHTML = "";
-    return;
-  }
-
-  if (!commandMap[command]) {
-    await printOutput(`<span class="output-error">Command not found:</span> ${command}`);
-    await printOutput("Type help to see available commands.");
-    return;
-  }
-
-  for (const line of commandMap[command]) {
-    await printOutput(line);
-  }
-
-  if (command === "projects") {
-    document.getElementById("projects")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+    scrollFrame = window.requestAnimationFrame(() => {
+      updateScrollState();
+      scrollFrame = null;
     });
-  }
+  },
+  { passive: true },
+);
+
+updateScrollState();
+
+if (pointerGlow && window.matchMedia("(pointer: fine)").matches && !reduceMotion) {
+  document.body.classList.add("has-pointer");
+
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      root.style.setProperty("--pointer-x", `${event.clientX}px`);
+      root.style.setProperty("--pointer-y", `${event.clientY}px`);
+    },
+    { passive: true },
+  );
 }
 
-function updateUptime() {
-  if (!uptime) {
+function setMenu(open) {
+  if (!menuToggle || !navigation) {
     return;
   }
 
-  const seconds = Math.floor((Date.now() - startedAt) / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-
-  uptime.textContent = `${minutes}m ${remainingSeconds}s`;
+  menuToggle.setAttribute("aria-expanded", String(open));
+  menuToggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+  navigation.classList.toggle("is-open", open);
+  document.body.classList.toggle("menu-open", open);
 }
 
-function finishBoot() {
-  if (bootDone) {
-    return;
+menuToggle?.addEventListener("click", () => {
+  setMenu(menuToggle.getAttribute("aria-expanded") !== "true");
+});
+
+navigation?.addEventListener("click", (event) => {
+  if (event.target.closest("a")) {
+    setMenu(false);
   }
+});
 
-  bootDone = true;
-  bootScreen.classList.add("hidden");
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    setMenu(false);
+  }
+});
 
-  window.setTimeout(() => {
-    terminalInput?.focus();
-  }, 500);
-}
+const revealItems = document.querySelectorAll(".reveal");
+document.querySelectorAll("#top .reveal").forEach((item) => item.classList.add("is-visible"));
 
-function waitForBootInput() {
-  const events = ["pointerdown", "keydown", "touchstart"];
+if (reduceMotion || !("IntersectionObserver" in window)) {
+  revealItems.forEach((item) => item.classList.add("is-visible"));
+} else {
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
 
-  const handler = () => {
-    events.forEach((eventName) => {
-      window.removeEventListener(eventName, handler);
-    });
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -10%", threshold: 0.08 },
+  );
 
-    finishBoot();
-  };
-
-  events.forEach((eventName) => {
-    window.addEventListener(eventName, handler, {
-      once: true,
-      passive: true,
-    });
+  revealItems.forEach((item) => {
+    if (!item.classList.contains("is-visible")) {
+      revealObserver.observe(item);
+    }
   });
 }
 
-projectButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const row = button.closest(".project-row");
-    const isOpen = row.classList.toggle("open");
+function setActiveScene(sceneId) {
+  navLinks.forEach((link) => {
+    const active = link.dataset.nav === sceneId;
+    link.classList.toggle("is-active", active);
 
-    button.setAttribute("aria-expanded", String(isOpen));
+    if (active) {
+      link.setAttribute("aria-current", "location");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+
+  railLinks.forEach((link) => {
+    const railScene = sceneId === "about" ? "process" : sceneId;
+    const active = link.dataset.rail === railScene;
+    link.classList.toggle("is-active", active);
+
+    if (active) {
+      link.setAttribute("aria-current", "location");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+document.querySelectorAll("[data-event]").forEach((element) => {
+  element.addEventListener("click", () => {
+    trackEvent(element.dataset.event, {
+      page_path: window.location.pathname,
+    });
   });
 });
 
-if (terminalForm && terminalInput && terminalOutput) {
-  terminalForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+briefForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
 
-    const value = terminalInput.value;
-    terminalInput.value = "";
+  if (!briefForm.reportValidity()) {
+    return;
+  }
 
-    await runCommand(value);
-  });
+  const data = new FormData(briefForm);
+  const name = String(data.get("name") || "").trim();
+  const email = String(data.get("email") || "").trim();
+  const projectType = String(data.get("projectType") || "Project enquiry").trim();
+  const problem = String(data.get("problem") || "").trim();
+  const subject = `[TechGnomo enquiry] ${projectType} — ${name}`;
+  const body = [
+    `Hi Fabio,`,
+    "",
+    `My name is ${name}.`,
+    `My email is ${email}.`,
+    `Project type: ${projectType}`,
+    "",
+    "The problem I want to solve:",
+    problem,
+    "",
+    "I would like to discuss the clearest next step.",
+  ].join("\n");
 
-  terminalOutput.addEventListener("dblclick", () => {
-    skipTyping = true;
-  });
-}
+  if (formStatus) {
+    formStatus.textContent = "Opening a new email with your brief…";
+  }
 
-window.addEventListener("load", () => {
-  updateUptime();
-  window.setInterval(updateUptime, 1000);
-  waitForBootInput();
+  trackEvent("project_brief_prepared", { project_type: projectType });
+  window.location.href = `mailto:gnomocode@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 });
+
+if (year) {
+  year.textContent = String(new Date().getFullYear());
+}
